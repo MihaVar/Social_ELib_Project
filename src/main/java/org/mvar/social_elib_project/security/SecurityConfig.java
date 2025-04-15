@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 
 import static org.mvar.social_elib_project.model.Role.ADMIN;
+import static org.mvar.social_elib_project.model.Role.USER;
 
 @Configuration
 @EnableWebSecurity
@@ -23,6 +24,10 @@ public class SecurityConfig {
     private static final String[] WHITELIST_URLS = {
             "/auth/**",
             "/error"
+    };
+
+    private static final String[] AUTHENTICATED_URLS = {
+            "/catalog/**"
     };
 
     private static final String[] ADMINLIST_URLS = {
@@ -42,6 +47,8 @@ public class SecurityConfig {
                         .hasAnyAuthority(ADMIN.name())
                         .requestMatchers(HttpMethod.DELETE, ADMINLIST_URLS)
                         .hasAnyAuthority(ADMIN.name())
+                        .requestMatchers(HttpMethod.POST, AUTHENTICATED_URLS)
+                        .hasAnyAuthority(USER.name())
                         .anyRequest()
                         .authenticated()
                 )

@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -16,9 +17,10 @@ import java.util.Date;
 @Document("catalog")
 public class Item {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @NotBlank(message = "Name is required")
+    @Getter
     private String name;
     @NotBlank(message = "Author is required")
     private String author;
@@ -31,6 +33,8 @@ public class Item {
     private String image;
     @NotBlank(message = "PDF is required")
     private String pdfLink;
+    @DBRef
     private User user;
+    @DBRef
     private ExpertComment expertComment;
 }
