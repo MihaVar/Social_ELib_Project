@@ -1,8 +1,8 @@
 package org.mvar.social_elib_project.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.mvar.social_elib_project.payload.request.AuthRequest;
-import org.mvar.social_elib_project.payload.request.RegisterRequest;
+import org.mvar.social_elib_project.payload.request.auth.AuthRequest;
+import org.mvar.social_elib_project.payload.request.auth.RegisterRequest;
 import org.mvar.social_elib_project.payload.response.AuthResponse;
 import org.mvar.social_elib_project.service.AuthService;
 import org.springframework.http.ResponseEntity;

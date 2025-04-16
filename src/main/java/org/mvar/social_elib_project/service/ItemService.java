@@ -3,7 +3,7 @@ package org.mvar.social_elib_project.service;
 import lombok.RequiredArgsConstructor;
 import org.mvar.social_elib_project.model.Item;
 import org.mvar.social_elib_project.model.User;
-import org.mvar.social_elib_project.payload.request.AddItemRequest;
+import org.mvar.social_elib_project.payload.request.item.AddItemRequest;
 import org.mvar.social_elib_project.repository.CommentRepository;
 import org.mvar.social_elib_project.repository.ItemRepository;
 import org.mvar.social_elib_project.repository.UserRepository;

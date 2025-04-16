@@ -2,8 +2,8 @@ package org.mvar.social_elib_project.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.mvar.social_elib_project.model.Comment;
-import org.mvar.social_elib_project.payload.request.AddCommentRequest;
-import org.mvar.social_elib_project.payload.request.DeleteCommentRequest;
+import org.mvar.social_elib_project.payload.request.comment.AddCommentRequest;
+import org.mvar.social_elib_project.payload.request.comment.DeleteCommentRequest;
 import org.mvar.social_elib_project.service.CommentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +24,7 @@ public class CommentController {
     @DeleteMapping("/comments")
     public ResponseEntity<Void> deleteComment(
             @RequestBody DeleteCommentRequest deleteCommentRequest,
-            Principal principal, @PathVariable String id) {
+            Principal principal) {
         commentService.deleteComment(deleteCommentRequest.id(), principal.getName());
 
         return ResponseEntity.noContent().build();

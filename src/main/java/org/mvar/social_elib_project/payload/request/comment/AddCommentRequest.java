@@ -1,4 +1,4 @@
-package org.mvar.social_elib_project.payload.request;
+package org.mvar.social_elib_project.payload.request.comment;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;

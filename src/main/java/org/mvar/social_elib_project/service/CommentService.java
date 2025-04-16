@@ -4,14 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.mvar.social_elib_project.model.Comment;
 import org.mvar.social_elib_project.model.Item;
 import org.mvar.social_elib_project.model.User;
-import org.mvar.social_elib_project.payload.request.AddCommentRequest;
+import org.mvar.social_elib_project.payload.request.comment.AddCommentRequest;
 import org.mvar.social_elib_project.repository.CommentRepository;
 import org.mvar.social_elib_project.repository.ItemRepository;
 import org.mvar.social_elib_project.repository.UserRepository;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 import java.util.List;
 
 @Service

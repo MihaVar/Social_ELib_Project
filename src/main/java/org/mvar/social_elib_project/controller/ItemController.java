@@ -2,8 +2,8 @@ package org.mvar.social_elib_project.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.mvar.social_elib_project.model.Item;
-import org.mvar.social_elib_project.payload.request.DeleteItemRequest;
-import org.mvar.social_elib_project.payload.request.AddItemRequest;
+import org.mvar.social_elib_project.payload.request.item.DeleteItemRequest;
+import org.mvar.social_elib_project.payload.request.item.AddItemRequest;
 import org.mvar.social_elib_project.service.ItemService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
