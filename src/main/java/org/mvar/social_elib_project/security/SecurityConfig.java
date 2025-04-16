@@ -49,6 +49,8 @@ public class SecurityConfig {
                         .hasAnyAuthority(ADMIN.name())
                         .requestMatchers(HttpMethod.POST, AUTHENTICATED_URLS)
                         .hasAnyAuthority(USER.name())
+                        .requestMatchers(HttpMethod.DELETE, AUTHENTICATED_URLS)
+                        .hasAnyAuthority(USER.name())
                         .anyRequest()
                         .authenticated()
                 )

@@ -2,12 +2,11 @@ package org.mvar.social_elib_project.payload.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
-import org.mvar.social_elib_project.model.User;
 
 import java.util.Date;
 
 @Builder
-public record ItemRequest(
+public record AddItemRequest(
         @NotBlank(message = "Name cannot be empty")
         String name,
         @NotBlank(message = "Author cannot be empty")

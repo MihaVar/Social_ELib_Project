@@ -18,7 +18,7 @@ import java.util.Date;
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private String id;
     @NotBlank(message = "Name is required")
     @Getter
     private String name;
@@ -33,8 +33,8 @@ public class Item {
     private String image;
     @NotBlank(message = "PDF is required")
     private String pdfLink;
-    @DBRef
-    private User user;
+    @NotBlank(message = "User is required")
+    private String user;
     @DBRef
     private ExpertComment expertComment;
 }
