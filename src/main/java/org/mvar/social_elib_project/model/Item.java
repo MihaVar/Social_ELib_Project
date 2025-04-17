@@ -39,6 +39,7 @@ public class Item {
     private String pdfLink;
     @NotBlank(message = "User is required")
     private String user;
-    @DBRef
     private ExpertComment expertComment;
+    private int rating = 0;
+    private Set<String> usersWhoVoted = new HashSet<>();
 }

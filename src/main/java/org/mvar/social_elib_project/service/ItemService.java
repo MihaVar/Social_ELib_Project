@@ -55,4 +55,30 @@ public class ItemService {
     public List<Item> getAllItems() {
         return itemRepository.findAll();
     }
+
+    public Item voteItem(String itemId, String user, int vote) {
+        Item item = itemRepository.findItemById(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
+        if (item.getUsersWhoVoted().contains(user)) {
+            throw new IllegalStateException("User has already voted for this item");
+        }
+        if (vote != 1 && vote != -1) {
+            throw new IllegalArgumentException("Invalid vote value. Must be 1 or -1");
+        }
+        item.setRating(item.getRating() + vote);
+        item.getUsersWhoVoted().add(user);
+        return itemRepository.save(item);
+    }
+
+    public Item unvoteItem(String itemId, String username) {
+        Item item = itemRepository.findItemById(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
+        if (!item.getUsersWhoVoted().contains(username)) {
+            throw new IllegalStateException("User has not voted for this item");
+        }
+        item.setRating(item.getRating() - (item.getRating() > 0 ? 1 : (item.getRating() < 0 ? -1 : 0)));
+        item.getUsersWhoVoted().remove(username);
+        return itemRepository.save(item);
+    }
+
 }
