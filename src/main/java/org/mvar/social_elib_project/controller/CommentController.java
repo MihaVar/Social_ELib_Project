@@ -19,7 +19,7 @@ public class CommentController {
     @PostMapping("/comments")
     public ResponseEntity<Comment> addComment(
             @RequestBody AddCommentRequest addCommentRequest, @PathVariable String id) {
-        return ResponseEntity.ok(commentService.addCommentToItem(addCommentRequest));
+        return ResponseEntity.ok(commentService.addCommentToItem(addCommentRequest, id));
     }
     @DeleteMapping("/comments")
     public ResponseEntity<Void> deleteComment(

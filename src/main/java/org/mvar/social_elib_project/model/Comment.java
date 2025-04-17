@@ -4,7 +4,11 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
@@ -16,8 +20,8 @@ public class Comment {
     private String id;
     @NotBlank(message = "Comment text cannot be empty")
     private String text;
-    @NotBlank(message = "Comment date cannot be empty")
-    private Date date;
+    @CreatedDate
+    private LocalDateTime date;
     @NotBlank(message = "Item cannot be empty")
     private String itemId;
     @NotBlank(message = "User cannot be empty")

@@ -7,7 +7,8 @@ import org.mvar.social_elib_project.model.User;
 import org.mvar.social_elib_project.payload.request.comment.AddCommentRequest;
 import org.mvar.social_elib_project.repository.CommentRepository;
 import org.mvar.social_elib_project.repository.ItemRepository;
-import org.mvar.social_elib_project.repository.UserRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,18 +20,21 @@ public class CommentService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
 
-    public Comment addCommentToItem(AddCommentRequest addCommentRequest) {
-        Item item = itemRepository.findById(addCommentRequest.itemId())
-                .orElseThrow(() -> new IllegalArgumentException("Item not found: " + addCommentRequest.itemId()));
+    public Comment addCommentToItem(AddCommentRequest addCommentRequest, String itemId) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
 
-        User user = userRepository.findUserByUsername(addCommentRequest.user())
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + addCommentRequest.user()));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User is not authenticated");
+        }
+        String user = authentication.getName();
         Comment comment = Comment.builder()
                 .text(addCommentRequest.text())
-                .date(addCommentRequest.date())
                 .itemId(item.getId())
-                .user(user.getUsername())
+                .user(user)
                 .build();
+        comment.setDate(LocalDateTime.now());
         return commentRepository.save(comment);
     }
 
