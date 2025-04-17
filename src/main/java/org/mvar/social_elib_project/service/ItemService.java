@@ -5,6 +5,7 @@ import org.mvar.social_elib_project.model.Item;
 import org.mvar.social_elib_project.model.User;
 import org.mvar.social_elib_project.payload.request.item.AddItemRequest;
 import org.mvar.social_elib_project.repository.CommentRepository;
+import org.mvar.social_elib_project.repository.ExpertCommentRepository;
 import org.mvar.social_elib_project.repository.ItemRepository;
 import org.mvar.social_elib_project.repository.UserRepository;
 import org.springframework.security.core.Authentication;
@@ -21,6 +22,7 @@ import java.util.List;
 public class ItemService {
     private final ItemRepository itemRepository;
     private final CommentRepository commentRepository;
+    private final ExpertCommentRepository expertCommentRepository;
 
     public Item createNewItem(AddItemRequest addItemRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -50,6 +52,7 @@ public class ItemService {
         }
         itemRepository.deleteById(id);
         commentRepository.deleteAllByItemId(id);
+        expertCommentRepository.deleteAllByItemId(id);
     }
 
     public List<Item> getAllItems() {

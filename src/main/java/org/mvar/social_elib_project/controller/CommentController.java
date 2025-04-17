@@ -6,6 +6,7 @@ import org.mvar.social_elib_project.model.Item;
 import org.mvar.social_elib_project.payload.request.comment.AddCommentRequest;
 import org.mvar.social_elib_project.payload.request.comment.AddExpertCommentRequest;
 import org.mvar.social_elib_project.payload.request.comment.DeleteCommentRequest;
+import org.mvar.social_elib_project.payload.request.comment.DeleteExpertCommentRequest;
 import org.mvar.social_elib_project.service.CommentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,9 +37,15 @@ public class CommentController {
             @PathVariable String id) {
         return commentService.getCommentsByItem(id);
     }
-    @PostMapping("/add_expert_comment")
+    @PostMapping("/expert_comment")
     public ResponseEntity<Item> addExpertComment(
             @RequestBody AddExpertCommentRequest addExpertCommentRequest, @PathVariable String id) {
         return ResponseEntity.ok(commentService.addExpertCommentToItem(addExpertCommentRequest, id));
+    }
+    @DeleteMapping("/expert_comment")
+    public ResponseEntity<Void> deleteExpertComment(
+            @RequestBody DeleteExpertCommentRequest deleteExpertCommentRequest, Principal principal) {
+        commentService.deleteExpertComment(deleteExpertCommentRequest.id(), principal.getName());
+        return ResponseEntity.noContent().build();
     }
 }

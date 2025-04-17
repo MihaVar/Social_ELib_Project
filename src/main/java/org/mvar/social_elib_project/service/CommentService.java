@@ -83,4 +83,13 @@ public class CommentService {
         item.setExpertComment(expertComment);
         return itemRepository.save(item);
     }
+
+    public void deleteExpertComment(String id, String user) {
+        ExpertComment expertComment = expertCommentRepository.findExpertCommentById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found: " + id));
+        if (!expertComment.getUser().equals(user)) {
+            throw new IllegalArgumentException("User not authorized to delete comment");
+        }
+        expertCommentRepository.deleteById(id);
+    }
 }
