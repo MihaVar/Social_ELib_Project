@@ -7,10 +7,12 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Data
 @Builder
@@ -28,8 +30,10 @@ public class Item {
     private String description;
     @NotBlank(message = "Category is required")
     private String category;
-    @NotBlank(message = "Publish date is required is required")
-    private Date date;
+    @NotBlank(message = "Publish date is required")
+    private String publishDate;
+    @CreatedDate
+    private LocalDateTime creationDate;
     private String image;
     @NotBlank(message = "PDF is required")
     private String pdfLink;

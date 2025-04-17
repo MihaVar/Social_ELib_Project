@@ -3,8 +3,6 @@ package org.mvar.social_elib_project.payload.request.item;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 
-import java.util.Date;
-
 @Builder
 public record AddItemRequest(
         @NotBlank(message = "Name cannot be empty")
@@ -16,11 +14,9 @@ public record AddItemRequest(
         @NotBlank(message = "Category cannot be empty")
         String category,
         @NotBlank(message = "Date cannot be empty")
-        Date date,
+        String publishDate,
         @NotBlank(message = "Link to source cannot be empty")
-        String pdfLink,
-        @NotBlank(message = "User cannot be empty")
-        String user
+        String pdfLink
 ) {
 
 }

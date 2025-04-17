@@ -7,30 +7,38 @@ import org.mvar.social_elib_project.payload.request.item.AddItemRequest;
 import org.mvar.social_elib_project.repository.CommentRepository;
 import org.mvar.social_elib_project.repository.ItemRepository;
 import org.mvar.social_elib_project.repository.UserRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ItemService {
     private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
     private final CommentRepository commentRepository;
 
     public Item createNewItem(AddItemRequest addItemRequest) {
-        User user = userRepository.findUserByUsername(addItemRequest.user())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + addItemRequest.user()));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User is not authenticated");
+        }
+        String user = authentication.getName();
         Item item = Item.builder()
                 .name(addItemRequest.name())
                 .author(addItemRequest.author())
                 .description(addItemRequest.description())
                 .category(addItemRequest.category())
-                .date(addItemRequest.date())
+                .publishDate(addItemRequest.publishDate())
                 .pdfLink(addItemRequest.pdfLink())
-                .user(user.getUsername())
+                .user(user)
+                .usersWhoVoted(new HashSet<>())
                 .build();
+        item.setCreationDate(LocalDateTime.now());
         return itemRepository.save(item);
     }
 
