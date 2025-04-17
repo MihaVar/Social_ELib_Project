@@ -1,14 +1,30 @@
 package org.mvar.social_elib_project.model;
 
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
+@Data
+@Builder
+@Document("expertcomments")
 public class ExpertComment {
-    @Getter
-    private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private String id;
+    @NotBlank(message = "Text is required")
     private String text;
-    private Date date;
-    private Item item;
-    private User user;
+    @CreatedDate
+    private LocalDateTime creationDate;
+    @NotBlank(message = "Item is required")
+    private String item;
+    @NotBlank(message = "User is required")
+    private String user;
 }

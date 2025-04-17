@@ -1,6 +1,7 @@
 package org.mvar.social_elib_project.security;
 
 import lombok.RequiredArgsConstructor;
+import org.mvar.social_elib_project.model.Role;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -14,8 +15,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 
-import static org.mvar.social_elib_project.model.Role.ADMIN;
-import static org.mvar.social_elib_project.model.Role.USER;
+import static org.mvar.social_elib_project.model.Role.*;
 
 @Configuration
 @EnableWebSecurity
@@ -26,8 +26,9 @@ public class SecurityConfig {
             "/error"
     };
 
-    private static final String[] AUTHENTICATED_URLS = {
-            "/catalog/**"
+    private static final String[] EXPERTLIST_URLS = {
+            "/catalog/{id}/add_expert_comment",
+            "/catalog/{id}/remove_expert_comment"
     };
 
     private static final String[] ADMINLIST_URLS = {
@@ -47,10 +48,8 @@ public class SecurityConfig {
                         .hasAnyAuthority(ADMIN.name())
                         .requestMatchers(HttpMethod.DELETE, ADMINLIST_URLS)
                         .hasAnyAuthority(ADMIN.name())
-                        .requestMatchers(HttpMethod.POST, AUTHENTICATED_URLS)
-                        .hasAnyAuthority(USER.name())
-                        .requestMatchers(HttpMethod.DELETE, AUTHENTICATED_URLS)
-                        .hasAnyAuthority(USER.name())
+                        .requestMatchers(HttpMethod.POST, EXPERTLIST_URLS)
+                        .hasAnyAuthority(EXPERT.name())
                         .anyRequest()
                         .authenticated()
                 )

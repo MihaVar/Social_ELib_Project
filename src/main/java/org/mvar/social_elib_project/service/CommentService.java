@@ -2,22 +2,27 @@ package org.mvar.social_elib_project.service;
 
 import lombok.RequiredArgsConstructor;
 import org.mvar.social_elib_project.model.Comment;
+import org.mvar.social_elib_project.model.ExpertComment;
 import org.mvar.social_elib_project.model.Item;
-import org.mvar.social_elib_project.model.User;
+import org.mvar.social_elib_project.model.Role;
 import org.mvar.social_elib_project.payload.request.comment.AddCommentRequest;
+import org.mvar.social_elib_project.payload.request.comment.AddExpertCommentRequest;
 import org.mvar.social_elib_project.repository.CommentRepository;
+import org.mvar.social_elib_project.repository.ExpertCommentRepository;
 import org.mvar.social_elib_project.repository.ItemRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class CommentService {
     private final CommentRepository commentRepository;
-    private final UserRepository userRepository;
+    private final ExpertCommentRepository expertCommentRepository;
     private final ItemRepository itemRepository;
 
     public Comment addCommentToItem(AddCommentRequest addCommentRequest, String itemId) {
@@ -49,5 +54,33 @@ public class CommentService {
 
     public List<Comment> getCommentsByItem(String itemId) {
         return commentRepository.findCommentsByItemId(itemId);
+    }
+
+    public Item addExpertCommentToItem(AddExpertCommentRequest addExpertCommentRequest, String itemId) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User is not authenticated");
+        }
+
+        boolean isExpert = authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals(Role.EXPERT.name()));
+        if (!isExpert) {
+            throw new IllegalStateException("User does not have permission to add expert comment");
+        }
+
+        String user = authentication.getName();
+
+        ExpertComment expertComment = ExpertComment.builder()
+                .id(UUID.randomUUID().toString())
+                .text(addExpertCommentRequest.text())
+                .item(item.getId())
+                .user(user)
+                .creationDate(LocalDateTime.now())
+                .build();
+        item.setExpertComment(expertComment);
+        return itemRepository.save(item);
     }
 }

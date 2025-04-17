@@ -2,7 +2,9 @@ package org.mvar.social_elib_project.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.mvar.social_elib_project.model.Comment;
+import org.mvar.social_elib_project.model.Item;
 import org.mvar.social_elib_project.payload.request.comment.AddCommentRequest;
+import org.mvar.social_elib_project.payload.request.comment.AddExpertCommentRequest;
 import org.mvar.social_elib_project.payload.request.comment.DeleteCommentRequest;
 import org.mvar.social_elib_project.service.CommentService;
 import org.springframework.http.ResponseEntity;
@@ -33,5 +35,10 @@ public class CommentController {
     public List<Comment> getComments(
             @PathVariable String id) {
         return commentService.getCommentsByItem(id);
+    }
+    @PostMapping("/add_expert_comment")
+    public ResponseEntity<Item> addExpertComment(
+            @RequestBody AddExpertCommentRequest addExpertCommentRequest, @PathVariable String id) {
+        return ResponseEntity.ok(commentService.addExpertCommentToItem(addExpertCommentRequest, id));
     }
 }
