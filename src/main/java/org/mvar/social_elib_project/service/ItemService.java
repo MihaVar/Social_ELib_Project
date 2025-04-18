@@ -2,15 +2,12 @@ package org.mvar.social_elib_project.service;
 
 import lombok.RequiredArgsConstructor;
 import org.mvar.social_elib_project.model.Item;
-import org.mvar.social_elib_project.model.User;
 import org.mvar.social_elib_project.payload.request.item.AddItemRequest;
 import org.mvar.social_elib_project.repository.CommentRepository;
 import org.mvar.social_elib_project.repository.ExpertCommentRepository;
 import org.mvar.social_elib_project.repository.ItemRepository;
-import org.mvar.social_elib_project.repository.UserRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

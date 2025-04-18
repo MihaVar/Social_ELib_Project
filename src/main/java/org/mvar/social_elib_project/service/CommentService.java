@@ -76,7 +76,7 @@ public class CommentService {
         ExpertComment expertComment = ExpertComment.builder()
                 .id(UUID.randomUUID().toString())
                 .text(addExpertCommentRequest.text())
-                .item(item.getId())
+                .itemId(item.getId())
                 .user(user)
                 .creationDate(LocalDateTime.now())
                 .build();

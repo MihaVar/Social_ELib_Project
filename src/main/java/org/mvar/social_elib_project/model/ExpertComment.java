@@ -6,7 +6,7 @@ import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -24,7 +24,7 @@ public class ExpertComment {
     @CreatedDate
     private LocalDateTime creationDate;
     @NotBlank(message = "Item is required")
-    private String item;
+    private String itemId;
     @NotBlank(message = "User is required")
     private String user;
 }
