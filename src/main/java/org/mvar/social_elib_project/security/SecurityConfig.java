@@ -32,7 +32,9 @@ public class SecurityConfig {
     };
 
     private static final String[] ADMINLIST_URLS = {
-            "/token/purge"
+            "/token/purge",
+            "/admin/**",
+            "/catalog/**"
     };
     private final JwtAuthFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
@@ -47,6 +49,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, ADMINLIST_URLS)
                         .hasAnyAuthority(ADMIN.name())
                         .requestMatchers(HttpMethod.DELETE, ADMINLIST_URLS)
+                        .hasAnyAuthority(ADMIN.name())
+                        .requestMatchers(HttpMethod.PATCH, ADMINLIST_URLS)
                         .hasAnyAuthority(ADMIN.name())
                         .requestMatchers(HttpMethod.POST, EXPERTLIST_URLS)
                         .hasAnyAuthority(EXPERT.name())
