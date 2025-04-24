@@ -5,6 +5,8 @@ import lombok.Builder;
 
 @Builder
 public record RegisterRequest(
+        @NotBlank(message = "Email cannot be empty")
+        String email,
         @NotBlank(message = "Username cannot be empty")
         String username,
         @NotBlank(message = "Password cannot be empty")

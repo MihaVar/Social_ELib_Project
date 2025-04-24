@@ -25,7 +25,8 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest registerRequest) {
         User user = User.builder()
-                .username(registerRequest.username())
+                .email(registerRequest.email())
+                .usersname(registerRequest.username())
                 .password(passwordEncoder.encode(registerRequest.password()))
                 .isActive(true)
                 .role(Role.USER)
@@ -41,11 +42,11 @@ public class AuthService {
     }
 
     public AuthResponse authenticate(AuthRequest authRequest) {
-        User user = userRepository.findUserByUsername(authRequest.username())
-                .orElseThrow(() -> new UsernameNotFoundException(authRequest.username()));
+        User user = userRepository.findUserByUsersname(authRequest.email())
+                .orElseThrow(() -> new UsernameNotFoundException(authRequest.email()));
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        authRequest.username(),
+                        authRequest.email(),
                         authRequest.password()
                 )
         );

@@ -25,7 +25,7 @@ public class UserService {
             throw new IllegalStateException("User is not authenticated");
         }
         String username = authentication.getName();
-        User user = userRepository.findUserByUsername(username)
+        User user = userRepository.findUserByUsersname(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
         if (!user.getUsername().equals(username)) {
             throw new SecurityException("Attempt to delete a different user account");

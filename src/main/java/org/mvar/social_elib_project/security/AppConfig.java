@@ -30,12 +30,6 @@ public class AppConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        return username -> userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found!"));
-    }
-
-    @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }

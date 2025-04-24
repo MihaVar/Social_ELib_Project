@@ -23,7 +23,10 @@ public class User implements UserDetails {
     private String id;
     @NotBlank(message = "Username is required")
     @Indexed(unique = true)
-    private String username;
+    private String usersname;
+    @NotBlank(message = "Email is required")
+    @Indexed(unique = true)
+    private String email;
     @NotBlank(message = "Password is required")
     private String password;
     private boolean isActive;
@@ -37,7 +40,11 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return email;
+    }
+
+    public void setUsersname(String usersname) {
+        this.usersname = usersname;
     }
 
     @Override

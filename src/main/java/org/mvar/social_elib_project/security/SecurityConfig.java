@@ -23,7 +23,8 @@ import static org.mvar.social_elib_project.model.Role.*;
 public class SecurityConfig {
     private static final String[] WHITELIST_URLS = {
             "/auth/**",
-            "/error"
+            "/error",
+            "/catalog/**"
     };
 
     private static final String[] EXPERTLIST_URLS = {
@@ -33,8 +34,7 @@ public class SecurityConfig {
 
     private static final String[] ADMINLIST_URLS = {
             "/token/purge",
-            "/admin/**",
-            "/catalog/**"
+            "/admin/**"
     };
     private final JwtAuthFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
