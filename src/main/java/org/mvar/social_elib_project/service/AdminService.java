@@ -29,7 +29,7 @@ public class AdminService {
         if (!isAdmin) {
             throw new SecurityException("User does not have permission to delete other users");
         }
-        User userToDelete = userRepository.findUserByUsername(username)
+        User userToDelete = userRepository.findUserByUsersname(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
 
         userRepository.delete(userToDelete);
@@ -37,7 +37,7 @@ public class AdminService {
 
     public User updateUserRole(AdminChangeRoleRequest request) {
         adminAuth();
-        User userToUpdate = userRepository.findUserByUsername(request.user())
+        User userToUpdate = userRepository.findUserByUsersname(request.user())
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + request.user()));
         userToUpdate.setRole(request.role());
         return userRepository.save(userToUpdate);
