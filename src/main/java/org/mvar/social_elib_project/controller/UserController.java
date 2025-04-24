@@ -2,13 +2,10 @@ package org.mvar.social_elib_project.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.mvar.social_elib_project.model.User;
+import org.mvar.social_elib_project.payload.request.user.UserChangeUsernameRequest;
 import org.mvar.social_elib_project.service.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
@@ -21,6 +18,13 @@ public class UserController {
             ) {
         userService.deleteCurrentUser();
         return ResponseEntity.noContent().build();
+    }
+    @PutMapping("/me")
+    public ResponseEntity<User> changeUsername(
+            @RequestBody UserChangeUsernameRequest request
+            ) {
+        User changedUsername = userService.changeUsername(request.usersname());
+        return ResponseEntity.ok(changedUsername);
     }
     @GetMapping()
     public ResponseEntity<List<User>> getAllUsers() {

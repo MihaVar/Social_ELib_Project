@@ -1,5 +1,6 @@
 package org.mvar.social_elib_project.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.mvar.social_elib_project.model.User;
 import org.mvar.social_elib_project.repository.UserRepository;
@@ -33,7 +34,28 @@ public class UserService {
         userRepository.delete(user);
     }
 
+    public User findUserByUsername(String username) {
+        return userRepository.findUserByUsersname(username).orElse(null);
+    }
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    @Transactional
+    public User changeUsername(String newUsername) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User is not authenticated");
+        }
+        String email = authentication.getName();
+        User currentUser = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
+        if (userRepository.findUserByUsersname(newUsername).isPresent() &&
+                !userRepository.findUserByUsersname(newUsername).get().getId().equals(currentUser.getId())) {
+            throw new IllegalArgumentException("Username already exists: " + newUsername);
+        }
+        currentUser.setUsersname(newUsername);
+        return userRepository.save(currentUser);
     }
 }
