@@ -7,9 +7,12 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 import java.util.Optional;
 
-public interface CommentRepository extends MongoRepository<Comment, String> {
-    List<Comment> findCommentsByItemId(String itemId);
-    Optional<Comment> findCommentById(String id);
+public interface CommentRepository extends MongoRepository<Comment, Long> {
+    List<Comment> findCommentsByItemId(long itemId);
+    Optional<Comment> findCommentByCommentId(long commentId);
+    void deleteAllByItemId(long itemId);
 
-    void deleteAllByItemId(@NotBlank(message = "Item cannot be empty") String itemId);
+    void deleteByItemId(@NotBlank(message = "Item cannot be empty") long itemId);
+
+    void deleteByCommentId(@NotBlank(message = "Comment text cannot be empty") long commentId);
 }

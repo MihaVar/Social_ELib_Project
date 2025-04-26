@@ -3,6 +3,7 @@ package org.mvar.social_elib_project.model;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +21,11 @@ public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
+    @NotBlank(message = "Item id is required")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name = "sequences", sequenceName = "items_sequence")
+    @Id
+    private long itemId;
     @NotBlank(message = "Name is required")
     @Getter
     private String name;

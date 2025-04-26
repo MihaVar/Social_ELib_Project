@@ -16,36 +16,36 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/catalog/{id}/")
+@RequestMapping("/catalog/{itemId}/")
 public class CommentController {
     private final CommentService commentService;
-    @PostMapping("/comments")
+    @PostMapping("/comments/add_comment")
     public ResponseEntity<Comment> addComment(
-            @RequestBody AddCommentRequest addCommentRequest, @PathVariable String id) {
-        return ResponseEntity.ok(commentService.addCommentToItem(addCommentRequest, id));
+            @RequestBody AddCommentRequest addCommentRequest, @PathVariable long itemId) {
+        return ResponseEntity.ok(commentService.addCommentToItem(addCommentRequest, itemId));
     }
-    @DeleteMapping("/comments")
+    @DeleteMapping("/comments/delete_comment")
     public ResponseEntity<Void> deleteComment(
             @RequestBody DeleteCommentRequest deleteCommentRequest,
-            Principal principal) {
-        commentService.deleteComment(deleteCommentRequest.id(), principal.getName());
+            Principal principal, @PathVariable long itemId) {
+        commentService.deleteComment(deleteCommentRequest.id());
 
         return ResponseEntity.noContent().build();
     }
     @GetMapping("/comments")
     public List<Comment> getComments(
-            @PathVariable String id) {
-        return commentService.getCommentsByItem(id);
+            @PathVariable long itemId) {
+        return commentService.getCommentsByItem(itemId);
     }
-    @PostMapping("/expert_comment")
+    @PostMapping("/add_expert_comment")
     public ResponseEntity<Item> addExpertComment(
-            @RequestBody AddExpertCommentRequest addExpertCommentRequest, @PathVariable String id) {
-        return ResponseEntity.ok(commentService.addExpertCommentToItem(addExpertCommentRequest, id));
+            @RequestBody AddExpertCommentRequest addExpertCommentRequest, @PathVariable long itemId) {
+        return ResponseEntity.ok(commentService.addExpertCommentToItem(addExpertCommentRequest, itemId));
     }
-    @DeleteMapping("/expert_comment")
+    @DeleteMapping("/delete_expert_comment")
     public ResponseEntity<Void> deleteExpertComment(
-            @RequestBody DeleteExpertCommentRequest deleteExpertCommentRequest, Principal principal) {
-        commentService.deleteExpertComment(deleteExpertCommentRequest.id(), principal.getName());
+            @RequestBody DeleteExpertCommentRequest deleteExpertCommentRequest, Principal principal, @PathVariable long itemId) {
+        commentService.deleteExpertComment(deleteExpertCommentRequest.id());
         return ResponseEntity.noContent().build();
     }
 }

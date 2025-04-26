@@ -6,6 +6,6 @@ import lombok.Builder;
 @Builder
 public record AdminDeleteCommentRequest(
         @NotBlank(message = "Comment id should not be empty")
-        String commentId
+        long commentId
 ) {
 }

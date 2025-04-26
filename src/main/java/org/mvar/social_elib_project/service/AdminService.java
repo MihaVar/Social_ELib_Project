@@ -43,15 +43,15 @@ public class AdminService {
         return userRepository.save(userToUpdate);
     }
 
-    public void deleteCommentByAdmin(String commentId) {
+    public void deleteCommentByAdmin(long commentId) {
         adminAuth();
-        Comment comment = commentRepository.findCommentById(commentId)
+        Comment comment = commentRepository.findCommentByCommentId(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found: " + commentId));
         commentRepository.delete(comment);
     }
 
-    public void deleteExpertCommentByAdmin(String expertCommentId) {
-        ExpertComment expertComment = expertCommentRepository.findExpertCommentById(expertCommentId)
+    public void deleteExpertCommentByAdmin(long expertCommentId) {
+        ExpertComment expertComment = expertCommentRepository.findExpertCommentByExpertCommentId(expertCommentId)
                 .orElseThrow(() -> new IllegalArgumentException("Expert comment not found: " + expertCommentId));
         Item item = itemRepository.findById(expertComment.getItemId())
                 .orElseThrow(() -> new IllegalArgumentException("Item not found: " + expertComment.getItemId()));
@@ -60,9 +60,9 @@ public class AdminService {
         item.setExpertComment(null);
     }
 
-    public void deleteItemByAdmin(String itemId) {
+    public void deleteItemByAdmin(long itemId) {
         adminAuth();
-        Item item = itemRepository.findItemById(itemId)
+        Item item = itemRepository.findItemByItemId(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
         itemRepository.delete(item);
         commentRepository.deleteAllByItemId(itemId);

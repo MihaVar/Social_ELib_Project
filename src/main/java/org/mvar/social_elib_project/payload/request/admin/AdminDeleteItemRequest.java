@@ -6,6 +6,6 @@ import lombok.Builder;
 @Builder
 public record AdminDeleteItemRequest(
         @NotBlank(message = "Item id should not be empty")
-        String itemId
+        long itemId
 ) {
 }

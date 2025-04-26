@@ -1,15 +1,14 @@
 package org.mvar.social_elib_project.service;
 
 import lombok.RequiredArgsConstructor;
-import org.mvar.social_elib_project.model.Comment;
-import org.mvar.social_elib_project.model.ExpertComment;
-import org.mvar.social_elib_project.model.Item;
-import org.mvar.social_elib_project.model.Role;
+import lombok.extern.slf4j.Slf4j;
+import org.mvar.social_elib_project.model.*;
 import org.mvar.social_elib_project.payload.request.comment.AddCommentRequest;
 import org.mvar.social_elib_project.payload.request.comment.AddExpertCommentRequest;
 import org.mvar.social_elib_project.repository.CommentRepository;
 import org.mvar.social_elib_project.repository.ExpertCommentRepository;
 import org.mvar.social_elib_project.repository.ItemRepository;
+import org.mvar.social_elib_project.repository.UserRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -18,46 +17,59 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CommentService {
     private final CommentRepository commentRepository;
     private final ExpertCommentRepository expertCommentRepository;
+    private final UserRepository userRepository;
     private final ItemRepository itemRepository;
+    private final IdCounterService idCounterService;
 
-    public Comment addCommentToItem(AddCommentRequest addCommentRequest, String itemId) {
-        Item item = itemRepository.findById(itemId)
+    public Comment addCommentToItem(AddCommentRequest addCommentRequest, long itemId) {
+        Item item = itemRepository.findItemByItemId(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new IllegalStateException("User is not authenticated");
         }
-        String user = authentication.getName();
+        String email = authentication.getName();
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
         Comment comment = Comment.builder()
                 .text(addCommentRequest.text())
-                .itemId(item.getId())
-                .user(user)
+                .itemId(item.getItemId())
+                .user(user.getUsersname())
                 .build();
         comment.setDate(LocalDateTime.now());
+        comment.setCommentId(idCounterService.generateSequence("comments_sequence"));
         return commentRepository.save(comment);
     }
 
-    public void deleteComment(String id, String user) {
-        Comment comment = commentRepository.findCommentById(id)
+    public void deleteComment(long id) {
+        Comment comment = commentRepository.findCommentByCommentId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found: " + id));
-        if (!comment.getUser().equals(user)) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User is not authenticated");
+        }
+        String email = authentication.getName();
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
+        if (!comment.getUser().equals(user.getUsersname())) {
             throw new IllegalArgumentException("User not authorized to delete comment");
         }
-        commentRepository.deleteById(id);
+        commentRepository.deleteByCommentId(id);
     }
 
-    public List<Comment> getCommentsByItem(String itemId) {
+    public List<Comment> getCommentsByItem(long itemId) {
         return commentRepository.findCommentsByItemId(itemId);
     }
 
-    public Item addExpertCommentToItem(AddExpertCommentRequest addExpertCommentRequest, String itemId) {
-        Item item = itemRepository.findById(itemId)
+    public Item addExpertCommentToItem(AddExpertCommentRequest addExpertCommentRequest, long itemId) {
+        Item item = itemRepository.findItemByItemId(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -71,25 +83,33 @@ public class CommentService {
             throw new IllegalStateException("User does not have permission to add expert comment");
         }
 
-        String user = authentication.getName();
-
+        String email = authentication.getName();
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
         ExpertComment expertComment = ExpertComment.builder()
-                .id(UUID.randomUUID().toString())
                 .text(addExpertCommentRequest.text())
-                .itemId(item.getId())
-                .user(user)
+                .itemId(item.getItemId())
+                .user(user.getUsersname())
                 .creationDate(LocalDateTime.now())
                 .build();
         item.setExpertComment(expertComment);
+        expertComment.setExpertCommentId(idCounterService.generateSequence("expert_comments_sequence"));
         return itemRepository.save(item);
     }
 
-    public void deleteExpertComment(String id, String user) {
-        ExpertComment expertComment = expertCommentRepository.findExpertCommentById(id)
+    public void deleteExpertComment(long id) {
+        ExpertComment expertComment = expertCommentRepository.findExpertCommentByExpertCommentId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found: " + id));
-        if (!expertComment.getUser().equals(user)) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User is not authenticated");
+        }
+        String email = authentication.getName();
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
+        if (!expertComment.getUser().equals(user.getUsersname())) {
             throw new IllegalArgumentException("User not authorized to delete comment");
         }
-        expertCommentRepository.deleteById(id);
+        expertCommentRepository.deleteByExpertCommentId(id);
     }
 }

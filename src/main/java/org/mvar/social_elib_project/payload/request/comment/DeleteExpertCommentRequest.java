@@ -6,6 +6,6 @@ import lombok.Builder;
 @Builder
 public record DeleteExpertCommentRequest(
         @NotBlank(message = "Id is required")
-        String id
+        long id
 ) {
 }

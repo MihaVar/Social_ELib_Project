@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,28 +28,35 @@ public class ItemController {
     public ResponseEntity<Void> deleteItem(
             @RequestBody DeleteItemRequest deleteItemRequest,
             Principal principal) {
-        itemService.deleteItem(deleteItemRequest.id(), principal.getName());
+        itemService.deleteItem(deleteItemRequest.id());
 
         return ResponseEntity.noContent().build();
     }
-    @GetMapping()
+    @GetMapping("/items")
     public ResponseEntity<List<Item>> getAllItems() {
         List<Item> items = itemService.getAllItems();
         return ResponseEntity.ok(items);
     }
-    @PostMapping("/{id}/vote")
+    @GetMapping("/{itemId}")
+    public ResponseEntity<Item> getItem(
+            @PathVariable long itemId
+    ) {
+        Optional<Item> item = itemService.getItemByItemId(itemId);
+        return item.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    @PostMapping("/{itemId}/vote")
     public ResponseEntity<Item> voteItem(
-            @PathVariable String id,
+            @PathVariable long itemId,
             @RequestBody VoteRequest voteRequest,
             Principal principal) {
-            Item updatedItem = itemService.voteItem(id, principal.getName(), voteRequest.vote());
+            Item updatedItem = itemService.voteItem(itemId, principal.getName(), voteRequest.vote());
             return ResponseEntity.ok(updatedItem);
     }
-    @PostMapping("/{id}/unvote")
+    @PostMapping("/{itemId}/unvote")
     public ResponseEntity<Item> unvoteItem(
-            @PathVariable String id,
+            @PathVariable long itemId,
             Principal principal) {
-        Item updatedItem = itemService.unvoteItem(id, principal.getName());
+        Item updatedItem = itemService.unvoteItem(itemId, principal.getName());
         return ResponseEntity.ok(updatedItem);
     }
 }

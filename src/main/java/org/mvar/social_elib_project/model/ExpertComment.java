@@ -19,12 +19,14 @@ public class ExpertComment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
+    @NotBlank(message = "Expert comment id is required")
+    private long expertCommentId;
     @NotBlank(message = "Text is required")
     private String text;
     @CreatedDate
     private LocalDateTime creationDate;
     @NotBlank(message = "Item is required")
-    private String itemId;
+    private long itemId;
     @NotBlank(message = "User is required")
     private String user;
 }

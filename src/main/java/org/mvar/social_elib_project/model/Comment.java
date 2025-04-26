@@ -17,11 +17,13 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private String id;
     @NotBlank(message = "Comment text cannot be empty")
+    private long commentId;
+    @NotBlank(message = "Comment text cannot be empty")
     private String text;
     @CreatedDate
     private LocalDateTime date;
     @NotBlank(message = "Item cannot be empty")
-    private String itemId;
+    private long itemId;
     @NotBlank(message = "User cannot be empty")
     private String user;
 }

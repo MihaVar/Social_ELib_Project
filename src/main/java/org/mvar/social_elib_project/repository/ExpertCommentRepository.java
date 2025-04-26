@@ -6,7 +6,9 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;
 
-public interface ExpertCommentRepository extends MongoRepository<ExpertComment, String> {
-    Optional<ExpertComment> findExpertCommentById(String id);
-    void deleteAllByItemId(@NotBlank(message = "Item cannot be empty") String itemId);
+public interface ExpertCommentRepository extends MongoRepository<ExpertComment, Long> {
+    Optional<ExpertComment> findExpertCommentByExpertCommentId(long expertCommentId);
+    void deleteAllByItemId(long itemId);
+
+    void deleteByExpertCommentId(@NotBlank(message = "Expert comment id is required") long expertCommentId);
 }
