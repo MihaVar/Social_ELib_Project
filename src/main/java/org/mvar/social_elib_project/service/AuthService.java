@@ -24,6 +24,12 @@ public class AuthService {
     private final TokenService tokenService;
 
     public AuthResponse register(RegisterRequest registerRequest) {
+        if(userRepository.findUserByUsersname(registerRequest.username()).isPresent()) {
+            throw new IllegalArgumentException("Username is already in use");
+        }
+        if(userRepository.findUserByEmail(registerRequest.email()).isPresent()) {
+            throw new IllegalArgumentException("Email is already in use");
+        }
         User user = User.builder()
                 .email(registerRequest.email())
                 .usersname(registerRequest.username())
@@ -42,7 +48,7 @@ public class AuthService {
     }
 
     public AuthResponse authenticate(AuthRequest authRequest) {
-        User user = userRepository.findUserByUsersname(authRequest.email())
+        User user = userRepository.findUserByEmail(authRequest.email())
                 .orElseThrow(() -> new UsernameNotFoundException(authRequest.email()));
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
