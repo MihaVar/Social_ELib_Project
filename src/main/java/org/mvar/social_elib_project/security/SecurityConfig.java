@@ -24,12 +24,18 @@ public class SecurityConfig {
     private static final String[] WHITELIST_URLS = {
             "/auth/**",
             "/error",
-            "/catalog/**"
+            "/catalog/items",
+            "/catalog/{id}",
+            "/comments"
     };
 
     private static final String[] EXPERTLIST_URLS = {
             "/catalog/{id}/add_expert_comment",
             "/catalog/{id}/remove_expert_comment"
+    };
+
+    private static final String[] AUTHORIZEDLIST_URLS = {
+            "/catalog/{itemId}/comments/add_comment"
     };
 
     private static final String[] ADMINLIST_URLS = {
@@ -44,18 +50,26 @@ public class SecurityConfig {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request ->
-                request.requestMatchers(WHITELIST_URLS)
-                        .permitAll()
-                        .requestMatchers(HttpMethod.POST, ADMINLIST_URLS)
-                        .hasAnyAuthority(ADMIN.name())
-                        .requestMatchers(HttpMethod.DELETE, ADMINLIST_URLS)
-                        .hasAnyAuthority(ADMIN.name())
-                        .requestMatchers(HttpMethod.PATCH, ADMINLIST_URLS)
-                        .hasAnyAuthority(ADMIN.name())
-                        .requestMatchers(HttpMethod.POST, EXPERTLIST_URLS)
-                        .hasAnyAuthority(EXPERT.name())
-                        .anyRequest()
-                        .authenticated()
+                        request.requestMatchers(WHITELIST_URLS)
+                                .permitAll()
+                                .requestMatchers(HttpMethod.GET, "/catalog") // Дозволяємо GET для /catalog/{id}
+                                .permitAll()
+                                .requestMatchers(HttpMethod.GET, "/catalog/{itemId}") // Дозволяємо GET для /catalog/{id}
+                                .permitAll()
+                                .requestMatchers(HttpMethod.GET, "/catalog/{itemId}/comments") // Дозволяємо GET для /catalog/{id}
+                                .permitAll()
+                                .requestMatchers(HttpMethod.POST, AUTHORIZEDLIST_URLS)
+                                .hasAnyAuthority(USER.name())
+                                .requestMatchers(HttpMethod.POST, ADMINLIST_URLS)
+                                .hasAnyAuthority(ADMIN.name())
+                                .requestMatchers(HttpMethod.DELETE, ADMINLIST_URLS)
+                                .hasAnyAuthority(ADMIN.name())
+                                .requestMatchers(HttpMethod.PATCH, ADMINLIST_URLS)
+                                .hasAnyAuthority(ADMIN.name())
+                                .requestMatchers(HttpMethod.POST, EXPERTLIST_URLS)
+                                .hasAnyAuthority(EXPERT.name())
+                                .anyRequest()
+                                .authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
@@ -67,6 +81,5 @@ public class SecurityConfig {
                 );
 
         return httpSecurity.build();
-
     }
 }
