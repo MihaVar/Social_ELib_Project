@@ -37,6 +37,9 @@ public class ItemService {
         String email = authentication.getName();
         User user = userRepository.findUserByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
+        if(itemRepository.findItemByPdfLink(addItemRequest.pdfLink()).isPresent()) {
+            throw new IllegalArgumentException("Material with same link already exists");
+        }
         Item item = Item.builder()
                 .name(addItemRequest.name())
                 .author(addItemRequest.author())
@@ -98,7 +101,7 @@ public class ItemService {
         if (!item.getUsersWhoVoted().contains(username)) {
             throw new IllegalStateException("User has not voted for this item");
         }
-        item.setRating(item.getRating() - (item.getRating() > 0 ? 1 : (item.getRating() < 0 ? -1 : 0)));
+        item.setRating(item.getRating() - (Integer.compare(item.getRating(), 0)));
         item.getUsersWhoVoted().remove(username);
         return itemRepository.save(item);
     }
