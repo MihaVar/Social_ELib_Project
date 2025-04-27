@@ -30,8 +30,9 @@ public class SecurityConfig {
     };
 
     private static final String[] EXPERTLIST_URLS = {
-            "/catalog/{id}/add_expert_comment",
-            "/catalog/{id}/remove_expert_comment"
+            "/catalog/**",
+            "/catalog/{itemId}/add_expert_comment",
+            "/catalog/{itemId}/remove_expert_comment"
     };
 
     private static final String[] AUTHORIZEDLIST_URLS = {
@@ -52,11 +53,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request ->
                         request.requestMatchers(WHITELIST_URLS)
                                 .permitAll()
-                                .requestMatchers(HttpMethod.GET, "/catalog") // Дозволяємо GET для /catalog/{id}
+                                .requestMatchers(HttpMethod.OPTIONS, "/**")
                                 .permitAll()
-                                .requestMatchers(HttpMethod.GET, "/catalog/{itemId}") // Дозволяємо GET для /catalog/{id}
+                                .requestMatchers(HttpMethod.GET, "/catalog")
                                 .permitAll()
-                                .requestMatchers(HttpMethod.GET, "/catalog/{itemId}/comments") // Дозволяємо GET для /catalog/{id}
+                                .requestMatchers(HttpMethod.GET, "/catalog/{itemId}")
+                                .permitAll()
+                                .requestMatchers(HttpMethod.GET, "/catalog/{itemId}/comments")
                                 .permitAll()
                                 .requestMatchers(HttpMethod.POST, AUTHORIZEDLIST_URLS)
                                 .hasAnyAuthority(USER.name())
