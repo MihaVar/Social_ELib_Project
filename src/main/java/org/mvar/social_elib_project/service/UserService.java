@@ -16,10 +16,6 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public User findUserByUsername(String username) {
-        return userRepository.findUserByUsername(username).orElse(null);
-    }
-
     public void deleteCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -28,14 +24,10 @@ public class UserService {
         String username = authentication.getName();
         User user = userRepository.findUserByUsersname(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
-        if (!user.getUsername().equals(username)) {
+        if (!user.getUsersname().equals(username)) {
             throw new SecurityException("Attempt to delete a different user account");
         }
         userRepository.delete(user);
-    }
-
-    public User findUserByUsername(String username) {
-        return userRepository.findUserByUsersname(username).orElse(null);
     }
 
     public List<User> getAllUsers() {
