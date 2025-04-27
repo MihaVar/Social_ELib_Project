@@ -2,8 +2,10 @@ package org.mvar.social_elib_project.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,6 +18,8 @@ import java.util.List;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Document("users")
 public class User implements UserDetails {
     @Id
@@ -32,6 +36,10 @@ public class User implements UserDetails {
     private boolean isActive;
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    public User(String testUser) {
+
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

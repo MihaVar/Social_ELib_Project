@@ -5,9 +5,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -16,6 +14,8 @@ import java.util.*;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Document("catalog")
 public class Item {
     @Id
