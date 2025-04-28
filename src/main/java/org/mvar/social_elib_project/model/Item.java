@@ -24,7 +24,6 @@ public class Item {
     @NotBlank(message = "Item id is required")
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @SequenceGenerator(name = "sequences", sequenceName = "items_sequence")
-    @Id
     private long itemId;
     @NotBlank(message = "Name is required")
     @Getter
@@ -44,7 +43,7 @@ public class Item {
     private String pdfLink;
     @NotBlank(message = "User is required")
     private String user;
-    private ExpertComment expertComment;
+    private Set<ExpertComment> expertComment = new HashSet<>();
     private int rating = 0;
     private Set<String> usersWhoVoted = new HashSet<>();
 }

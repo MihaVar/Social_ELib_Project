@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.mvar.social_elib_project.model.Item;
 import org.mvar.social_elib_project.payload.request.item.DeleteItemRequest;
 import org.mvar.social_elib_project.payload.request.item.AddItemRequest;
+import org.mvar.social_elib_project.payload.request.item.UpdateItemRequest;
 import org.mvar.social_elib_project.payload.request.item.VoteRequest;
 import org.mvar.social_elib_project.service.ItemService;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +44,20 @@ public class ItemController {
     ) {
         Optional<Item> item = itemService.getItemByItemId(itemId);
         return item.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    @CrossOrigin(origins = "http://localhost:3000")
+    @PatchMapping("/{itemId}/update_item")
+    public ResponseEntity<Item> updateItem(
+            @PathVariable long itemId,
+            @RequestBody UpdateItemRequest updateItemRequest
+    ) {
+        return ResponseEntity.ok(itemService.updateItemField(updateItemRequest, itemId));
+    }
+    @GetMapping("/{itemId}/check_update_permission")
+    public ResponseEntity<Boolean> checkUpdateItemPermission(
+            @PathVariable long itemId) {
+        boolean hasPermission = itemService.checkUserItemPermission(itemId);
+        return ResponseEntity.ok(hasPermission);
     }
     @PostMapping("/{itemId}/vote")
     public ResponseEntity<Item> voteItem(

@@ -36,7 +36,11 @@ public class SecurityConfig {
     };
 
     private static final String[] AUTHORIZEDLIST_URLS = {
-            "/catalog/{itemId}/comments/add_comment"
+            "/catalog/{itemId}/comments/add_comment",
+            "/catalog/add_item",
+            "/catalog/delete_item",
+            "/catalog/{itemId}/check_update_permission",
+            "catalog/{itemId}/update_item",
     };
 
     private static final String[] ADMINLIST_URLS = {
@@ -61,7 +65,13 @@ public class SecurityConfig {
                                 .permitAll()
                                 .requestMatchers(HttpMethod.GET, "/catalog/{itemId}/comments")
                                 .permitAll()
+                                .requestMatchers(HttpMethod.GET, AUTHORIZEDLIST_URLS)
+                                .permitAll()
                                 .requestMatchers(HttpMethod.POST, AUTHORIZEDLIST_URLS)
+                                .hasAnyAuthority(USER.name())
+                                .requestMatchers(HttpMethod.PATCH, AUTHORIZEDLIST_URLS)
+                                .hasAnyAuthority(USER.name())
+                                .requestMatchers(HttpMethod.GET, "/catalog/{itemId}/check_update_permission")
                                 .hasAnyAuthority(USER.name())
                                 .requestMatchers(HttpMethod.POST, ADMINLIST_URLS)
                                 .hasAnyAuthority(ADMIN.name())

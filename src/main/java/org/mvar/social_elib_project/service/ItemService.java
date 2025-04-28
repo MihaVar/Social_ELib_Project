@@ -1,9 +1,11 @@
 package org.mvar.social_elib_project.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.mvar.social_elib_project.model.Item;
 import org.mvar.social_elib_project.model.User;
 import org.mvar.social_elib_project.payload.request.item.AddItemRequest;
+import org.mvar.social_elib_project.payload.request.item.UpdateItemRequest;
 import org.mvar.social_elib_project.repository.CommentRepository;
 import org.mvar.social_elib_project.repository.ExpertCommentRepository;
 import org.mvar.social_elib_project.repository.ItemRepository;
@@ -12,7 +14,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -49,6 +50,7 @@ public class ItemService {
                 .pdfLink(addItemRequest.pdfLink())
                 .user(user.getUsersname())
                 .usersWhoVoted(new HashSet<>())
+                .expertComment(new HashSet<>())
                 .build();
         item.setCreationDate(LocalDateTime.now());
         item.setItemId(idCounterService.generateSequence("items_sequence"));
@@ -56,18 +58,8 @@ public class ItemService {
     }
 
     public void deleteItem(Long id) {
-        Item item = itemRepository.findItemByItemId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Item not found: " + id));
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("User is not authenticated");
-        }
-        String email = authentication.getName();
-        User user = userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
-        if (!item.getUser().equals(user.getUsersname())) {
-            throw new IllegalArgumentException("User not authorized to delete item");
-        }
+        checkUserItemPermission(id);
+
         itemRepository.deleteByItemId(id);
         commentRepository.deleteAllByItemId(id);
         expertCommentRepository.deleteAllByItemId(id);
@@ -80,6 +72,57 @@ public class ItemService {
     public Optional<Item> getItemByItemId(Long id) {
         return itemRepository.findItemByItemId(id);
     }
+
+    @Transactional
+    public Item updateItemField(UpdateItemRequest request, Long id) {
+        Item item = itemRepository.findItemByItemId(id)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found: " + id));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User is not authenticated");
+        }
+        String email = authentication.getName();
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
+        if (!item.getUser().equals(user.getUsersname())) {
+            throw new IllegalArgumentException("User not authorized to perform action");
+        }
+
+        if (!allowedUpdateProperties.contains(request.fieldName())) {
+            throw new IllegalArgumentException("Field update is not allowed: " + request.fieldName());
+        }
+
+        switch (request.fieldName()) {
+            case "name" -> item.setName(request.newValue());
+            case "author" -> item.setAuthor(request.newValue());
+            case "description" -> item.setDescription(request.newValue());
+            case "publishDate" -> item.setPublishDate(request.newValue());
+            case "image" -> item.setImage(request.newValue());
+            case "pdfLink" -> item.setPdfLink(request.newValue());
+            default -> throw new IllegalArgumentException("Unsupported field: " + request.fieldName());
+        }
+
+        return itemRepository.save(item);
+    }
+
+    public boolean checkUserItemPermission(Long itemId) {
+        Item item = itemRepository.findItemByItemId(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User is not authenticated");
+        }
+        String email = authentication.getName();
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
+        if (!item.getUser().equals(user.getUsersname())) {
+            throw new IllegalArgumentException("User not authorized to perform action");
+        }
+        return true;
+    }
+
 
     public Item voteItem(Long itemId, String user, int vote) {
         Item item = itemRepository.findItemByItemId(itemId)
