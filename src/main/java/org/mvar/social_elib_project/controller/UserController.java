@@ -1,6 +1,7 @@
 package org.mvar.social_elib_project.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.mvar.social_elib_project.model.Role;
 import org.mvar.social_elib_project.model.User;
 import org.mvar.social_elib_project.payload.request.user.UserChangeUsernameRequest;
 import org.mvar.social_elib_project.service.UserService;
@@ -30,5 +31,9 @@ public class UserController {
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
+    }
+    @GetMapping("/role")
+    public ResponseEntity<Role> getUserRole() {
+        return ResponseEntity.ok(userService.getUserRole());
     }
 }

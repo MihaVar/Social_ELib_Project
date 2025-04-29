@@ -38,6 +38,13 @@ public class ItemController {
         List<Item> items = itemService.getAllItems();
         return ResponseEntity.ok(items);
     }
+    @GetMapping("/category/{categoryName}")
+    public ResponseEntity<List<Item>> getItemsByCategory(
+            @PathVariable String categoryName
+    ) {
+        List<Item> items = itemService.getItemsByCategory(categoryName);
+        return ResponseEntity.ok(items);
+    }
     @GetMapping("/{itemId}")
     public ResponseEntity<Item> getItem(
             @PathVariable long itemId
@@ -59,7 +66,7 @@ public class ItemController {
         boolean hasPermission = itemService.checkUserItemPermission(itemId);
         return ResponseEntity.ok(hasPermission);
     }
-    @PostMapping("/{itemId}/vote")
+    @PutMapping("/{itemId}/vote")
     public ResponseEntity<Item> voteItem(
             @PathVariable long itemId,
             @RequestBody VoteRequest voteRequest,
@@ -67,7 +74,7 @@ public class ItemController {
             Item updatedItem = itemService.voteItem(itemId, principal.getName(), voteRequest.vote());
             return ResponseEntity.ok(updatedItem);
     }
-    @PostMapping("/{itemId}/unvote")
+    @PatchMapping("/{itemId}/unvote")
     public ResponseEntity<Item> unvoteItem(
             @PathVariable long itemId,
             Principal principal) {

@@ -16,7 +16,8 @@ public record AddItemRequest(
         @NotBlank(message = "Date cannot be empty")
         String publishDate,
         @NotBlank(message = "Link to source cannot be empty")
-        String pdfLink
+        String pdfLink,
+        String imageUrl
 ) {
 
 }

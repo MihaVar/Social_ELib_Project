@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import org.mvar.social_elib_project.model.Item;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ItemRepository extends MongoRepository<Item, Long> {
@@ -12,4 +13,6 @@ public interface ItemRepository extends MongoRepository<Item, Long> {
     void deleteByItemId(long itemId);
 
     Optional<Item> findItemByPdfLink(@NotBlank(message = "PDF is required") String pdfLink);
+
+    List<Item> findItemsByCategory(String category);
 }

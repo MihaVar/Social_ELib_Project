@@ -25,12 +25,12 @@ public class SecurityConfig {
             "/auth/**",
             "/error",
             "/catalog/items",
-            "/catalog/{id}",
-            "/comments"
+            "/catalog/{itemId}",
+            "/catalog/category/{categoryName}",
+            "/catalog/{itemId}/comments"
     };
 
     private static final String[] EXPERTLIST_URLS = {
-            "/catalog/**",
             "/catalog/{itemId}/add_expert_comment",
             "/catalog/{itemId}/remove_expert_comment"
     };
@@ -40,7 +40,9 @@ public class SecurityConfig {
             "/catalog/add_item",
             "/catalog/delete_item",
             "/catalog/{itemId}/check_update_permission",
-            "catalog/{itemId}/update_item",
+            "/catalog/{itemId}/update_item",
+            "/catalog/{itemId}/vote",
+            "/catalog/{itemId}/unvote"
     };
 
     private static final String[] ADMINLIST_URLS = {
@@ -59,6 +61,8 @@ public class SecurityConfig {
                                 .permitAll()
                                 .requestMatchers(HttpMethod.OPTIONS, "/**")
                                 .permitAll()
+                                .requestMatchers(HttpMethod.GET, "/catalog/category/{categoryName}")
+                                .permitAll()
                                 .requestMatchers(HttpMethod.GET, "/catalog")
                                 .permitAll()
                                 .requestMatchers(HttpMethod.GET, "/catalog/{itemId}")
@@ -68,11 +72,11 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, AUTHORIZEDLIST_URLS)
                                 .permitAll()
                                 .requestMatchers(HttpMethod.POST, AUTHORIZEDLIST_URLS)
-                                .hasAnyAuthority(USER.name())
+                                .hasAnyAuthority(USER.name(), EXPERT.name())
                                 .requestMatchers(HttpMethod.PATCH, AUTHORIZEDLIST_URLS)
-                                .hasAnyAuthority(USER.name())
+                                .hasAnyAuthority(USER.name(), EXPERT.name())
                                 .requestMatchers(HttpMethod.GET, "/catalog/{itemId}/check_update_permission")
-                                .hasAnyAuthority(USER.name())
+                                .hasAnyAuthority(USER.name(), EXPERT.name())
                                 .requestMatchers(HttpMethod.POST, ADMINLIST_URLS)
                                 .hasAnyAuthority(ADMIN.name())
                                 .requestMatchers(HttpMethod.DELETE, ADMINLIST_URLS)

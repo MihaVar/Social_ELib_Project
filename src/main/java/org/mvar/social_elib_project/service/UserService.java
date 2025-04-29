@@ -2,6 +2,7 @@ package org.mvar.social_elib_project.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.mvar.social_elib_project.model.Role;
 import org.mvar.social_elib_project.model.User;
 import org.mvar.social_elib_project.repository.UserRepository;
 import org.springframework.security.core.Authentication;
@@ -49,5 +50,16 @@ public class UserService {
         }
         currentUser.setUsersname(newUsername);
         return userRepository.save(currentUser);
+    }
+
+    public Role getUserRole() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User is not authenticated");
+        }
+        String email = authentication.getName();
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
+        return user.getRole();
     }
 }

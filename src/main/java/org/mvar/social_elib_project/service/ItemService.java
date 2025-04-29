@@ -28,7 +28,7 @@ public class ItemService {
     private final CommentRepository commentRepository;
     private final ExpertCommentRepository expertCommentRepository;
     private final IdCounterService idCounterService;
-    private final List<String> allowedUpdateProperties = Arrays.asList("name", "author", "description", "publishDate", "image", "pdfLink");
+    private final List<String> allowedUpdateProperties = Arrays.asList("name", "author", "description", "category", "publishDate", "image", "pdfLink");
 
     public Item createNewItem(AddItemRequest addItemRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -73,6 +73,10 @@ public class ItemService {
         return itemRepository.findItemByItemId(id);
     }
 
+    public List<Item> getItemsByCategory(String category) {
+        return itemRepository.findItemsByCategory(category);
+    }
+
     @Transactional
     public Item updateItemField(UpdateItemRequest request, Long id) {
         Item item = itemRepository.findItemByItemId(id)
@@ -97,6 +101,7 @@ public class ItemService {
             case "name" -> item.setName(request.newValue());
             case "author" -> item.setAuthor(request.newValue());
             case "description" -> item.setDescription(request.newValue());
+            case "category" -> item.setCategory(request.newValue());
             case "publishDate" -> item.setPublishDate(request.newValue());
             case "image" -> item.setImage(request.newValue());
             case "pdfLink" -> item.setPdfLink(request.newValue());
