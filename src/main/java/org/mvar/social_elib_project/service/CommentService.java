@@ -1,10 +1,12 @@
 package org.mvar.social_elib_project.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mvar.social_elib_project.model.*;
 import org.mvar.social_elib_project.payload.request.comment.AddCommentRequest;
 import org.mvar.social_elib_project.payload.request.comment.AddExpertCommentRequest;
+import org.mvar.social_elib_project.payload.request.comment.UpdateCommentRequest;
 import org.mvar.social_elib_project.repository.CommentRepository;
 import org.mvar.social_elib_project.repository.ExpertCommentRepository;
 import org.mvar.social_elib_project.repository.ItemRepository;
@@ -15,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -64,6 +65,37 @@ public class CommentService {
         commentRepository.deleteByCommentId(id);
     }
 
+    public boolean checkUserCommentPermission(Long itemId) {
+        Comment comment = commentRepository.findCommentByCommentId(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found: " + itemId));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User is not authenticated");
+        }
+        String email = authentication.getName();
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
+        return comment.getUser().equals(user.getUsersname());
+    }
+
+    @Transactional
+    public Comment updateCommentText(UpdateCommentRequest request, Long id) {
+        Comment comment = commentRepository.findCommentByCommentId(id)
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found: " + id));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User is not authenticated");
+        }
+        String email = authentication.getName();
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
+        if (!comment.getUser().equals(user.getUsersname())) {
+            throw new IllegalArgumentException("User not authorized to perform action");
+        }
+        comment.setText(request.text());
+        return commentRepository.save(comment);
+    }
+
     public List<Comment> getCommentsByItem(long itemId) {
         return commentRepository.findCommentsByItemId(itemId);
     }
@@ -92,7 +124,7 @@ public class CommentService {
                 .user(user.getUsersname())
                 .creationDate(LocalDateTime.now())
                 .build();
-        item.setExpertComment(expertComment);
+        item.getExpertComment().add(expertComment);
         expertComment.setExpertCommentId(idCounterService.generateSequence("expert_comments_sequence"));
         return itemRepository.save(item);
     }
