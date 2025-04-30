@@ -48,6 +48,7 @@ public class ItemService {
                 .category(addItemRequest.category())
                 .publishDate(addItemRequest.publishDate())
                 .pdfLink(addItemRequest.pdfLink())
+                .image(addItemRequest.imageUrl())
                 .user(user.getUsersname())
                 .usersWhoVoted(new HashSet<>())
                 .expertComment(new HashSet<>())
@@ -122,10 +123,7 @@ public class ItemService {
         String email = authentication.getName();
         User user = userRepository.findUserByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
-        if (!item.getUser().equals(user.getUsersname())) {
-            throw new IllegalArgumentException("User not authorized to perform action");
-        }
-        return true;
+        return item.getUser().equals(user.getUsersname());
     }
 
 
@@ -152,5 +150,17 @@ public class ItemService {
         item.setRating(item.getRating() - (Integer.compare(item.getRating(), 0)));
         item.getUsersWhoVoted().remove(username);
         return itemRepository.save(item);
+    }
+
+    public boolean checkIfUserVoted(Long itemId) {
+        Item item = itemRepository.findItemByItemId(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User is not authenticated");
+        }
+        String email = authentication.getName();
+        // Перевіряємо, чи містить набір голосуючих користувачів ім'я користувача
+        return item.getUsersWhoVoted().contains(email);
     }
 }

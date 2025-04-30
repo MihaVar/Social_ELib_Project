@@ -2,10 +2,7 @@ package org.mvar.social_elib_project.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.mvar.social_elib_project.model.Item;
-import org.mvar.social_elib_project.payload.request.item.DeleteItemRequest;
-import org.mvar.social_elib_project.payload.request.item.AddItemRequest;
-import org.mvar.social_elib_project.payload.request.item.UpdateItemRequest;
-import org.mvar.social_elib_project.payload.request.item.VoteRequest;
+import org.mvar.social_elib_project.payload.request.item.*;
 import org.mvar.social_elib_project.service.ItemService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -80,5 +77,10 @@ public class ItemController {
             Principal principal) {
         Item updatedItem = itemService.unvoteItem(itemId, principal.getName());
         return ResponseEntity.ok(updatedItem);
+    }
+    @GetMapping("/{itemId}/vote-status")
+    public ResponseEntity<Boolean> getVoteStatus(@PathVariable Long itemId) {
+        boolean hasVoted = itemService.checkIfUserVoted(itemId);
+        return ResponseEntity.ok(hasVoted);
     }
 }
