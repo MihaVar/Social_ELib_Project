@@ -8,7 +8,6 @@ import org.mvar.social_elib_project.service.CommentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -21,11 +20,10 @@ public class CommentController {
             @RequestBody AddCommentRequest addCommentRequest, @PathVariable long itemId) {
         return ResponseEntity.ok(commentService.addCommentToItem(addCommentRequest, itemId));
     }
-    @DeleteMapping("/comments/delete_comment")
+    @DeleteMapping("/comments/{commentId}/delete_comment")
     public ResponseEntity<Void> deleteComment(
-            @RequestBody DeleteCommentRequest deleteCommentRequest,
-            Principal principal, @PathVariable long itemId) {
-        commentService.deleteComment(deleteCommentRequest.id());
+            @PathVariable long commentId) {
+        commentService.deleteComment(commentId);
 
         return ResponseEntity.noContent().build();
     }
