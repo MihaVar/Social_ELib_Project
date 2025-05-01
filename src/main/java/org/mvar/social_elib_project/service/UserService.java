@@ -22,10 +22,10 @@ public class UserService {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new IllegalStateException("User is not authenticated");
         }
-        String username = authentication.getName();
-        User user = userRepository.findUserByUsersname(username)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
-        if (!user.getUsersname().equals(username)) {
+        String email = authentication.getName();
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
+        if (!user.getEmail().equals(email)) {
             throw new SecurityException("Attempt to delete a different user account");
         }
         userRepository.delete(user);
@@ -34,6 +34,17 @@ public class UserService {
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
+
+    public User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User is not authenticated");
+        }
+        String email = authentication.getName(); // або username, якщо токен містить username
+        return userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
+    }
+
 
     @Transactional
     public User changeUsername(String newUsername) {

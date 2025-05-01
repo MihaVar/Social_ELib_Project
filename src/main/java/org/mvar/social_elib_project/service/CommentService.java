@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -129,9 +131,79 @@ public class CommentService {
         return itemRepository.save(item);
     }
 
-    public void deleteExpertComment(long id) {
-        ExpertComment expertComment = expertCommentRepository.findExpertCommentByExpertCommentId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Comment not found: " + id));
+    @Transactional
+    public void deleteExpertComment(long expertCommentId) {
+        // Аутентифікація
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User is not authenticated");
+        }
+
+        String email = authentication.getName();
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
+
+        // Знайти Item, який містить цей коментар
+        Optional<Item> itemOptional = itemRepository.findAll().stream()
+                .filter(item -> item.getExpertComment().stream()
+                        .anyMatch(comment -> comment.getExpertCommentId() == expertCommentId))
+                .findFirst();
+
+        if (itemOptional.isEmpty()) {
+            throw new IllegalArgumentException("ExpertComment not found in any item: " + expertCommentId);
+        }
+
+        Item item = itemOptional.get();
+
+        // Знайти коментар і перевірити користувача
+        ExpertComment commentToDelete = item.getExpertComment().stream()
+                .filter(comment -> comment.getExpertCommentId() == expertCommentId)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("ExpertComment not found: " + expertCommentId));
+
+        if (!commentToDelete.getUser().equals(user.getUsersname())) {
+            throw new IllegalArgumentException("User not authorized to delete this comment");
+        }
+
+        // Видалити коментар із Set
+        item.getExpertComment().remove(commentToDelete);
+
+        // Зберегти зміни
+        itemRepository.save(item);
+    }
+
+
+    public boolean checkExpertCommentPermission(Long expertCommentId) {
+        // Отримуємо аутентифікованого користувача
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User is not authenticated");
+        }
+
+        String email = authentication.getName();
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
+
+        // Шукаємо Item, який містить експертний коментар з таким id
+        Optional<Item> itemOptional = itemRepository.findAll().stream()
+                .filter(item -> item.getExpertComment().stream()
+                        .anyMatch(comment -> comment.getExpertCommentId() == expertCommentId))
+                .findFirst();
+
+        if (itemOptional.isEmpty()) {
+            throw new IllegalArgumentException("Expert comment not found: " + expertCommentId);
+        }
+
+        // Перевіряємо, чи user збігається
+        Item item = itemOptional.get();
+        return item.getExpertComment().stream()
+                .filter(comment -> comment.getExpertCommentId() == expertCommentId)
+                .anyMatch(comment -> comment.getUser().equals(user.getUsersname()));
+    }
+
+
+    @Transactional
+    public Item updateExpertCommentText(UpdateCommentRequest request, Long expertCommentId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new IllegalStateException("User is not authenticated");
@@ -139,9 +211,33 @@ public class CommentService {
         String email = authentication.getName();
         User user = userRepository.findUserByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
-        if (!expertComment.getUser().equals(user.getUsersname())) {
-            throw new IllegalArgumentException("User not authorized to delete comment");
+
+        Optional<Item> itemOptional = itemRepository.findAll().stream()
+                .filter(item -> item.getExpertComment().stream()
+                        .anyMatch(comment -> comment.getExpertCommentId() == expertCommentId))
+                .findFirst();
+
+        if (itemOptional.isEmpty()) {
+            throw new IllegalArgumentException("ExpertComment not found in any item: " + expertCommentId);
         }
-        expertCommentRepository.deleteByExpertCommentId(id);
+
+        Item item = itemOptional.get();
+
+        ExpertComment commentToUpdate = item.getExpertComment().stream()
+                .filter(comment -> comment.getExpertCommentId() == expertCommentId)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("ExpertComment not found: " + expertCommentId));
+        if (!commentToUpdate.getUser().equals(user.getUsersname())) {
+            throw new IllegalArgumentException("User not authorized to perform action");
+        }
+        commentToUpdate.setText(request.text());
+        return itemRepository.save(item);
+    }
+
+
+    public Set<ExpertComment> getExpertCommentsByItemId(long itemId) {
+        Item item = itemRepository.findItemByItemId(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
+        return item.getExpertComment();
     }
 }

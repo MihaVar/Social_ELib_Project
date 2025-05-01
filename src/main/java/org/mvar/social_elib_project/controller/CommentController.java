@@ -50,10 +50,27 @@ public class CommentController {
             @RequestBody AddExpertCommentRequest addExpertCommentRequest, @PathVariable long itemId) {
         return ResponseEntity.ok(commentService.addExpertCommentToItem(addExpertCommentRequest, itemId));
     }
-    @DeleteMapping("/delete_expert_comment")
+    @GetMapping("/expert_comments")
+    public ResponseEntity<Set<ExpertComment>> getExpertComments(
+            @PathVariable long itemId) {
+        Set<ExpertComment> expertComments = commentService.getExpertCommentsByItemId(itemId);
+        return ResponseEntity.ok(expertComments);
+    }
+    @GetMapping("/expert_comments/{expertCommentId}")
+    public boolean checkExpertCommentPermission(
+            @PathVariable long expertCommentId, @PathVariable long itemId) {
+        return commentService.checkExpertCommentPermission(expertCommentId);
+    }
+    @DeleteMapping("/expert_comments/{expertCommentId}/delete_expert_comment")
     public ResponseEntity<Void> deleteExpertComment(
-            @RequestBody DeleteExpertCommentRequest deleteExpertCommentRequest, @PathVariable long itemId) {
-        commentService.deleteExpertComment(deleteExpertCommentRequest.id());
+            @PathVariable long expertCommentId, @PathVariable long itemId) {
+        commentService.deleteExpertComment(expertCommentId);
+        return ResponseEntity.noContent().build();
+    }
+    @PatchMapping("/expert_comments/{expertCommentId}/update_expert_comment")
+    public ResponseEntity<Void> editExpertComment(
+            @RequestBody UpdateCommentRequest request, @PathVariable long expertCommentId, @PathVariable long itemId) {
+        commentService.updateExpertCommentText(request, expertCommentId);
         return ResponseEntity.noContent().build();
     }
 }

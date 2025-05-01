@@ -14,13 +14,17 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;
+    @GetMapping("/me")
+    public ResponseEntity<User> getCurrentUser() {
+        return ResponseEntity.ok(userService.getCurrentUser());
+    }
     @DeleteMapping("/me")
     public ResponseEntity<Void> deleteCurrentUser(
             ) {
         userService.deleteCurrentUser();
         return ResponseEntity.noContent().build();
     }
-    @PutMapping("/me")
+    @PatchMapping("/me")
     public ResponseEntity<User> changeUsername(
             @RequestBody UserChangeUsernameRequest request
             ) {

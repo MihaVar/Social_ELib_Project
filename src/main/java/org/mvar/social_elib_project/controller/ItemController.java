@@ -22,11 +22,10 @@ public class ItemController {
     ) {
         return ResponseEntity.ok(itemService.createNewItem(addItemRequest));
     }
-    @DeleteMapping("/delete_item")
+    @DeleteMapping("/{itemId}/delete_item")
     public ResponseEntity<Void> deleteItem(
-            @RequestBody DeleteItemRequest deleteItemRequest,
-            Principal principal) {
-        itemService.deleteItem(deleteItemRequest.id());
+            @PathVariable long itemId) {
+        itemService.deleteItem(itemId);
 
         return ResponseEntity.noContent().build();
     }

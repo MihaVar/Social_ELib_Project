@@ -32,7 +32,7 @@ public class SecurityConfig {
 
     private static final String[] EXPERTLIST_URLS = {
             "/catalog/{itemId}/add_expert_comment",
-            "/catalog/{itemId}/remove_expert_comment"
+            "/catalog/{itemId}/expert_comments/**"
     };
 
     private static final String[] AUTHORIZEDLIST_URLS = {

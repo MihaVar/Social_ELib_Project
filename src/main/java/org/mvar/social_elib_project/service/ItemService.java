@@ -59,8 +59,19 @@ public class ItemService {
     }
 
     public void deleteItem(Long id) {
-        checkUserItemPermission(id);
+        Item item = itemRepository.findItemByItemId(id)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found: " + id));
 
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User is not authenticated");
+        }
+        String email = authentication.getName();
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
+        if (!item.getUser().equals(user.getUsersname())) {
+            throw new IllegalArgumentException("User not authorized to perform action");
+        }
         itemRepository.deleteByItemId(id);
         commentRepository.deleteAllByItemId(id);
         expertCommentRepository.deleteAllByItemId(id);
