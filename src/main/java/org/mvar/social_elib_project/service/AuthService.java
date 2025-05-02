@@ -64,4 +64,8 @@ public class AuthService {
                 .token(jwtToken)
                 .build();
     }
+
+    public void logout(String token) {
+        tokenService.invalidateToken(token);
+    }
 }
