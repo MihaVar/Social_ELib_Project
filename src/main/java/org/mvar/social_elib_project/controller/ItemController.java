@@ -1,12 +1,16 @@
 package org.mvar.social_elib_project.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.mvar.social_elib_project.model.Item;
 import org.mvar.social_elib_project.payload.request.item.*;
 import org.mvar.social_elib_project.service.ItemService;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
@@ -16,12 +20,18 @@ import java.util.Optional;
 @RequestMapping("/catalog")
 public class ItemController {
     private final ItemService itemService;
-    @PostMapping("/add_item")
+    @PostMapping(value = "/add_item", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Item> addItem(
-            @RequestBody AddItemRequest addItemRequest
-    ) {
-        return ResponseEntity.ok(itemService.createNewItem(addItemRequest));
+            @RequestPart("data") String dataJson,
+            @RequestPart(value = "image", required = false) MultipartFile image
+
+    ) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        AddItemRequest request = objectMapper.readValue(dataJson, AddItemRequest.class);
+        return ResponseEntity.ok(itemService.createNewItem(request, image));
     }
+
+
     @DeleteMapping("/{itemId}/delete_item")
     public ResponseEntity<Void> deleteItem(
             @PathVariable long itemId) {
@@ -52,9 +62,22 @@ public class ItemController {
     @PatchMapping("/{itemId}/update_item")
     public ResponseEntity<Item> updateItem(
             @PathVariable long itemId,
-            @RequestBody UpdateItemRequest updateItemRequest
-    ) {
-        return ResponseEntity.ok(itemService.updateItemField(updateItemRequest, itemId));
+            @RequestPart(required = false) MultipartFile image,  // файл зображення
+            @RequestPart(required = false, name="data") String updateItemRequestJson // параметр для JSON даних
+    ) throws IOException {
+        UpdateItemRequest updateItemRequest = null;
+
+        // Перевірка на null для параметра "data"
+        if (updateItemRequestJson != null && !updateItemRequestJson.isEmpty()) {
+            // Перетворюємо JSON на об'єкт UpdateItemRequest
+            ObjectMapper objectMapper = new ObjectMapper();
+            updateItemRequest = objectMapper.readValue(updateItemRequestJson, UpdateItemRequest.class);
+        }
+
+        // Оновлюємо предмет через сервіс
+        Item updatedItem = itemService.updateItem(updateItemRequest, itemId, image);
+
+        return ResponseEntity.ok(updatedItem);
     }
     @GetMapping("/{itemId}/check_update_permission")
     public ResponseEntity<Boolean> checkUpdateItemPermission(
@@ -81,5 +104,9 @@ public class ItemController {
     public ResponseEntity<Boolean> getVoteStatus(@PathVariable Long itemId) {
         boolean hasVoted = itemService.checkIfUserVoted(itemId);
         return ResponseEntity.ok(hasVoted);
+    }
+    @GetMapping("/items/{username}")
+    public ResponseEntity<List<Item>> getItemsByUsername(@PathVariable String username) {
+        return ResponseEntity.ok(itemService.getItemsByUser(username));
     }
 }

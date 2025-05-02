@@ -27,7 +27,9 @@ public class SecurityConfig {
             "/catalog/items",
             "/catalog/{itemId}",
             "/catalog/category/{categoryName}",
-            "/catalog/{itemId}/comments"
+            "/catalog/{itemId}/comments",
+            "images/{id}",
+            "/catalog/items/{username}"
     };
 
     private static final String[] EXPERTLIST_URLS = {
@@ -60,14 +62,6 @@ public class SecurityConfig {
                         request.requestMatchers(WHITELIST_URLS)
                                 .permitAll()
                                 .requestMatchers(HttpMethod.OPTIONS, "/**")
-                                .permitAll()
-                                .requestMatchers(HttpMethod.GET, "/catalog/category/{categoryName}")
-                                .permitAll()
-                                .requestMatchers(HttpMethod.GET, "/catalog")
-                                .permitAll()
-                                .requestMatchers(HttpMethod.GET, "/catalog/{itemId}")
-                                .permitAll()
-                                .requestMatchers(HttpMethod.GET, "/catalog/{itemId}/comments")
                                 .permitAll()
                                 .requestMatchers(HttpMethod.GET, AUTHORIZEDLIST_URLS)
                                 .permitAll()

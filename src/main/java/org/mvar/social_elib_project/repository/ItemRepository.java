@@ -12,7 +12,9 @@ public interface ItemRepository extends MongoRepository<Item, Long> {
 
     void deleteByItemId(long itemId);
 
-    Optional<Item> findItemByPdfLink(@NotBlank(message = "PDF is required") String pdfLink);
+    Optional<Item> findItemByMaterialLink(@NotBlank(message = "Material link is required") String materialLink);
 
     List<Item> findItemsByCategory(String category);
+
+    List<Item> findItemsByUser(@NotBlank(message = "User is required") String user);
 }

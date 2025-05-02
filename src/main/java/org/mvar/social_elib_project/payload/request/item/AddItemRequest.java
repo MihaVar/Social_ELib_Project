@@ -2,6 +2,7 @@ package org.mvar.social_elib_project.payload.request.item;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
+import org.springframework.web.multipart.MultipartFile;
 
 @Builder
 public record AddItemRequest(
@@ -16,8 +17,8 @@ public record AddItemRequest(
         @NotBlank(message = "Date cannot be empty")
         String publishDate,
         @NotBlank(message = "Link to source cannot be empty")
-        String pdfLink,
-        String imageUrl
+        String materialLink,
+        MultipartFile image
 ) {
 
 }

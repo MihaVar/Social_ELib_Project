@@ -40,7 +40,7 @@ public class Item {
     private LocalDateTime creationDate;
     private String image;
     @NotBlank(message = "PDF is required")
-    private String pdfLink;
+    private String materialLink;
     @NotBlank(message = "User is required")
     private String user;
     private Set<ExpertComment> expertComment = new HashSet<>();

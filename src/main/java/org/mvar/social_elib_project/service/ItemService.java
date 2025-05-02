@@ -7,15 +7,15 @@ import org.mvar.social_elib_project.model.User;
 import org.mvar.social_elib_project.payload.request.item.AddItemRequest;
 import org.mvar.social_elib_project.payload.request.item.UpdateItemRequest;
 import org.mvar.social_elib_project.repository.CommentRepository;
-import org.mvar.social_elib_project.repository.ExpertCommentRepository;
 import org.mvar.social_elib_project.repository.ItemRepository;
 import org.mvar.social_elib_project.repository.UserRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -26,29 +26,30 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
-    private final ExpertCommentRepository expertCommentRepository;
     private final IdCounterService idCounterService;
-    private final List<String> allowedUpdateProperties = Arrays.asList("name", "author", "description", "category", "publishDate", "image", "pdfLink");
+    private final ImageService imageService;
 
-    public Item createNewItem(AddItemRequest addItemRequest) {
+    public Item createNewItem(AddItemRequest request, MultipartFile image) throws IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new IllegalStateException("User is not authenticated");
         }
         String email = authentication.getName();
         User user = userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
-        if(itemRepository.findItemByPdfLink(addItemRequest.pdfLink()).isPresent()) {
-            throw new IllegalArgumentException("Material with same link already exists");
+                .orElseThrow(() -> new IllegalArgumentException("User with email " + email + " not found"));
+
+        if (itemRepository.findItemByMaterialLink(request.materialLink()).isPresent()) {
+            throw new IllegalArgumentException("Material with the same PDF link already exists");
         }
+        String imageUrl = (image != null && !image.isEmpty()) ? imageService.saveImage(image) : null;
         Item item = Item.builder()
-                .name(addItemRequest.name())
-                .author(addItemRequest.author())
-                .description(addItemRequest.description())
-                .category(addItemRequest.category())
-                .publishDate(addItemRequest.publishDate())
-                .pdfLink(addItemRequest.pdfLink())
-                .image(addItemRequest.imageUrl())
+                .name(request.name())
+                .author(request.author())
+                .description(request.description())
+                .category(request.category())
+                .publishDate(request.publishDate())
+                .materialLink(request.materialLink())
+                .image(imageUrl)
                 .user(user.getUsersname())
                 .usersWhoVoted(new HashSet<>())
                 .expertComment(new HashSet<>())
@@ -74,7 +75,6 @@ public class ItemService {
         }
         itemRepository.deleteByItemId(id);
         commentRepository.deleteAllByItemId(id);
-        expertCommentRepository.deleteAllByItemId(id);
     }
 
     public List<Item> getAllItems() {
@@ -85,43 +85,51 @@ public class ItemService {
         return itemRepository.findItemByItemId(id);
     }
 
+    public List<Item> getItemsByUser(String username) { return itemRepository.findItemsByUser(username); }
+
     public List<Item> getItemsByCategory(String category) {
         return itemRepository.findItemsByCategory(category);
     }
 
     @Transactional
-    public Item updateItemField(UpdateItemRequest request, Long id) {
-        Item item = itemRepository.findItemByItemId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Item not found: " + id));
+    public Item updateItem(UpdateItemRequest updateItemRequest, long itemId, MultipartFile image) throws IOException {
+        // Знаходимо предмет по ID
+        Item item = itemRepository.findItemByItemId(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found"));
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("User is not authenticated");
-        }
-        String email = authentication.getName();
-        User user = userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
-        if (!item.getUser().equals(user.getUsersname())) {
-            throw new IllegalArgumentException("User not authorized to perform action");
-        }
-
-        if (!allowedUpdateProperties.contains(request.fieldName())) {
-            throw new IllegalArgumentException("Field update is not allowed: " + request.fieldName());
-        }
-
-        switch (request.fieldName()) {
-            case "name" -> item.setName(request.newValue());
-            case "author" -> item.setAuthor(request.newValue());
-            case "description" -> item.setDescription(request.newValue());
-            case "category" -> item.setCategory(request.newValue());
-            case "publishDate" -> item.setPublishDate(request.newValue());
-            case "image" -> item.setImage(request.newValue());
-            case "pdfLink" -> item.setPdfLink(request.newValue());
-            default -> throw new IllegalArgumentException("Unsupported field: " + request.fieldName());
+        // Якщо updateItemRequest не null, оновлюємо основні поля предмета
+        if (updateItemRequest != null) {
+            if (updateItemRequest.name() != null) {
+                item.setName(updateItemRequest.name());
+            }
+            if (updateItemRequest.author() != null) {
+                item.setAuthor(updateItemRequest.author());
+            }
+            if (updateItemRequest.description() != null) {
+                item.setDescription(updateItemRequest.description());
+            }
+            if (updateItemRequest.category() != null) {
+                item.setCategory(updateItemRequest.category());
+            }
+            if (updateItemRequest.publishDate() != null) {
+                item.setPublishDate(updateItemRequest.publishDate());
+            }
+            if (updateItemRequest.materialLink() != null) {
+                item.setMaterialLink(updateItemRequest.materialLink());
+            }
         }
 
+        // Оновлюємо зображення, якщо файл передано
+        if (image != null && !image.isEmpty()) {
+            String imageUrl = imageService.saveImage(image);
+            item.setImage(imageUrl);
+        }
+
+        // Зберігаємо оновлений предмет
         return itemRepository.save(item);
     }
+
+
 
     public boolean checkUserItemPermission(Long itemId) {
         Item item = itemRepository.findItemByItemId(itemId)
@@ -136,7 +144,6 @@ public class ItemService {
                 .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
         return item.getUser().equals(user.getUsersname());
     }
-
 
     public Item voteItem(Long itemId, String user, int vote) {
         Item item = itemRepository.findItemByItemId(itemId)
@@ -175,3 +182,4 @@ public class ItemService {
         return item.getUsersWhoVoted().contains(email);
     }
 }
+
