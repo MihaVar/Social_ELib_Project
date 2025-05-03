@@ -8,6 +8,7 @@ import org.mvar.social_elib_project.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,6 +36,12 @@ public class UserController {
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
+    }
+    @GetMapping("/{username}")
+    public ResponseEntity<Optional<User>> getUser(
+            @PathVariable String username
+    ) {
+        return ResponseEntity.ok(userService.getUserByUsername(username));
     }
     @GetMapping("/role")
     public ResponseEntity<Role> getUserRole() {

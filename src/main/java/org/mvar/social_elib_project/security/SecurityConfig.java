@@ -28,8 +28,9 @@ public class SecurityConfig {
             "/catalog/{itemId}",
             "/catalog/category/{categoryName}",
             "/catalog/{itemId}/comments",
-            "images/{id}",
-            "/catalog/items/{username}"
+            "/images/{id}",
+            "/catalog/items/{username}",
+            "/users/{username}"
     };
 
     private static final String[] EXPERTLIST_URLS = {

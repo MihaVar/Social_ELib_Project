@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -72,5 +73,9 @@ public class UserService {
         User user = userRepository.findUserByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
         return user.getRole();
+    }
+
+    public Optional<User> getUserByUsername(String username) {
+        return userRepository.findUserByUsersname(username);
     }
 }
