@@ -13,32 +13,32 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/admin")
 public class AdminUserController {
     private final AdminService adminService;
-    @DeleteMapping("/remove_user")
+    @DeleteMapping("/remove_user/{username}")
     public ResponseEntity<Void> deleteUser(
-            @RequestBody AdminDeleteUserRequest request
+            @PathVariable String username
             ) {
-        adminService.deleteUserByAdmin(request.user());
+        adminService.deleteUserByAdmin(username);
         return ResponseEntity.noContent().build();
     }
-    @DeleteMapping("/remove_item")
+    @DeleteMapping("/remove_item/{itemId}")
     public ResponseEntity<Void> deleteItem(
-            @RequestBody AdminDeleteItemRequest request
+            @PathVariable long itemId
     ) {
-        adminService.deleteItemByAdmin(request.itemId());
+        adminService.deleteItemByAdmin(itemId);
         return ResponseEntity.noContent().build();
     }
-    @DeleteMapping("/remove_comment")
+    @DeleteMapping("/remove_comment/{commentId}")
     public ResponseEntity<Void> deleteComment(
-            @RequestBody AdminDeleteCommentRequest request
+            @PathVariable long commentId
     ) {
-        adminService.deleteCommentByAdmin(request.commentId());
+        adminService.deleteCommentByAdmin(commentId);
         return ResponseEntity.noContent().build();
     }
-    @DeleteMapping("/remove_expert_comment")
+    @DeleteMapping("/remove_expert_comment/{expertCommentId}")
     public ResponseEntity<Void> deleteExpertComment(
-            @RequestBody AdminDeleteExpertCommentRequest request
+            @PathVariable long expertCommentId
             ) {
-        adminService.deleteExpertCommentByAdmin(request.expertCommentId());
+        adminService.deleteExpertCommentByAdmin(expertCommentId);
         return ResponseEntity.noContent().build();
     }
     @PatchMapping("/role")
