@@ -2,6 +2,7 @@ package org.mvar.social_elib_project.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.mvar.social_elib_project.model.Comment;
+import org.mvar.social_elib_project.model.ExpertComment;
 import org.mvar.social_elib_project.model.Item;
 import org.mvar.social_elib_project.payload.request.comment.*;
 import org.mvar.social_elib_project.service.CommentService;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,7 +24,7 @@ public class CommentController {
     }
     @DeleteMapping("/comments/{commentId}/delete_comment")
     public ResponseEntity<Void> deleteComment(
-            @PathVariable long commentId) {
+            @PathVariable long commentId, @PathVariable String itemId) {
         commentService.deleteComment(commentId);
 
         return ResponseEntity.noContent().build();

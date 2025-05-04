@@ -93,11 +93,9 @@ public class ItemService {
 
     @Transactional
     public Item updateItem(UpdateItemRequest updateItemRequest, long itemId, MultipartFile image) throws IOException {
-        // Знаходимо предмет по ID
         Item item = itemRepository.findItemByItemId(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found"));
 
-        // Якщо updateItemRequest не null, оновлюємо основні поля предмета
         if (updateItemRequest != null) {
             if (updateItemRequest.name() != null) {
                 item.setName(updateItemRequest.name());
@@ -118,14 +116,11 @@ public class ItemService {
                 item.setMaterialLink(updateItemRequest.materialLink());
             }
         }
-
-        // Оновлюємо зображення, якщо файл передано
         if (image != null && !image.isEmpty()) {
             String imageUrl = imageService.saveImage(image);
             item.setImage(imageUrl);
         }
 
-        // Зберігаємо оновлений предмет
         return itemRepository.save(item);
     }
 

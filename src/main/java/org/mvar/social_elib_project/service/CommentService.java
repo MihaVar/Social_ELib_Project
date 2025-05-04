@@ -2,13 +2,11 @@ package org.mvar.social_elib_project.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.mvar.social_elib_project.model.*;
 import org.mvar.social_elib_project.payload.request.comment.AddCommentRequest;
 import org.mvar.social_elib_project.payload.request.comment.AddExpertCommentRequest;
 import org.mvar.social_elib_project.payload.request.comment.UpdateCommentRequest;
 import org.mvar.social_elib_project.repository.CommentRepository;
-import org.mvar.social_elib_project.repository.ExpertCommentRepository;
 import org.mvar.social_elib_project.repository.ItemRepository;
 import org.mvar.social_elib_project.repository.UserRepository;
 import org.springframework.security.core.Authentication;
@@ -20,12 +18,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CommentService {
     private final CommentRepository commentRepository;
-    private final ExpertCommentRepository expertCommentRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
     private final IdCounterService idCounterService;
@@ -133,29 +129,24 @@ public class CommentService {
 
     @Transactional
     public void deleteExpertComment(long expertCommentId) {
-        // Аутентифікація
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new IllegalStateException("User is not authenticated");
         }
-
         String email = authentication.getName();
         User user = userRepository.findUserByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
 
-        // Знайти Item, який містить цей коментар
         Optional<Item> itemOptional = itemRepository.findAll().stream()
                 .filter(item -> item.getExpertComment().stream()
                         .anyMatch(comment -> comment.getExpertCommentId() == expertCommentId))
                 .findFirst();
-
         if (itemOptional.isEmpty()) {
             throw new IllegalArgumentException("ExpertComment not found in any item: " + expertCommentId);
         }
 
         Item item = itemOptional.get();
 
-        // Знайти коментар і перевірити користувача
         ExpertComment commentToDelete = item.getExpertComment().stream()
                 .filter(comment -> comment.getExpertCommentId() == expertCommentId)
                 .findFirst()
@@ -164,37 +155,27 @@ public class CommentService {
         if (!commentToDelete.getUser().equals(user.getUsersname())) {
             throw new IllegalArgumentException("User not authorized to delete this comment");
         }
-
-        // Видалити коментар із Set
         item.getExpertComment().remove(commentToDelete);
-
-        // Зберегти зміни
         itemRepository.save(item);
     }
 
 
     public boolean checkExpertCommentPermission(Long expertCommentId) {
-        // Отримуємо аутентифікованого користувача
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new IllegalStateException("User is not authenticated");
         }
-
         String email = authentication.getName();
         User user = userRepository.findUserByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
 
-        // Шукаємо Item, який містить експертний коментар з таким id
         Optional<Item> itemOptional = itemRepository.findAll().stream()
                 .filter(item -> item.getExpertComment().stream()
                         .anyMatch(comment -> comment.getExpertCommentId() == expertCommentId))
                 .findFirst();
-
         if (itemOptional.isEmpty()) {
             throw new IllegalArgumentException("Expert comment not found: " + expertCommentId);
         }
-
-        // Перевіряємо, чи user збігається
         Item item = itemOptional.get();
         return item.getExpertComment().stream()
                 .filter(comment -> comment.getExpertCommentId() == expertCommentId)

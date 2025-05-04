@@ -1,7 +1,6 @@
 package org.mvar.social_elib_project.security;
 
 import lombok.RequiredArgsConstructor;
-import org.mvar.social_elib_project.model.Role;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -45,7 +44,8 @@ public class SecurityConfig {
             "/catalog/{itemId}/check_update_permission",
             "/catalog/{itemId}/update_item",
             "/catalog/{itemId}/vote",
-            "/catalog/{itemId}/unvote"
+            "/catalog/{itemId}/unvote",
+            "/users/me"
     };
 
     private static final String[] ADMINLIST_URLS = {
@@ -65,12 +65,10 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.OPTIONS, "/**")
                                 .permitAll()
                                 .requestMatchers(HttpMethod.GET, AUTHORIZEDLIST_URLS)
-                                .permitAll()
+                                .hasAnyAuthority(USER.name(), EXPERT.name(), ADMIN.name())
                                 .requestMatchers(HttpMethod.POST, AUTHORIZEDLIST_URLS)
                                 .hasAnyAuthority(USER.name(), EXPERT.name(), ADMIN.name())
                                 .requestMatchers(HttpMethod.PATCH, AUTHORIZEDLIST_URLS)
-                                .hasAnyAuthority(USER.name(), EXPERT.name(), ADMIN.name())
-                                .requestMatchers(HttpMethod.GET, "/catalog/{itemId}/check_update_permission")
                                 .hasAnyAuthority(USER.name(), EXPERT.name(), ADMIN.name())
                                 .requestMatchers(HttpMethod.POST, ADMINLIST_URLS)
                                 .hasAnyAuthority(ADMIN.name())

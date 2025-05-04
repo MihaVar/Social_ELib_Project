@@ -2,17 +2,16 @@ package org.mvar.social_elib_project;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mvar.social_elib_project.model.Role;
+import org.mvar.social_elib_project.model.User;
+import org.mvar.social_elib_project.repository.UserRepository;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mvar.social_elib_project.model.User;
-import org.mvar.social_elib_project.repository.UserRepository;
 import org.mvar.social_elib_project.service.UserService;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,102 +23,113 @@ class UserServiceTests {
     @Mock
     private UserRepository userRepository;
 
-    @Mock
-    private Authentication authentication;
-
-    @Mock
-    private SecurityContext securityContext;
-
     @InjectMocks
     private UserService userService;
+
+    private final String email = "test@example.com";
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        SecurityContextHolder.setContext(securityContext);
+        SecurityContextHolder.clearContext();
+    }
+
+    private void mockAuth(String email) {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(email, null, List.of())
+        );
     }
 
     @Test
-    void deleteCurrentUser_success() {
-        User user = new User();
-        user.setUsersname("testUser");
+    void getCurrentUser_shouldReturnUser() {
+        mockAuth(email);
+        var user = new User();
+        user.setEmail(email);
+        when(userRepository.findUserByEmail(email)).thenReturn(Optional.of(user));
 
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.isAuthenticated()).thenReturn(true);
-        when(authentication.getName()).thenReturn("testUser");
-        when(userRepository.findUserByUsersname("testUser")).thenReturn(Optional.of(user));
+        var result = userService.getCurrentUser();
+        assertEquals(email, result.getEmail());
+    }
+
+    @Test
+    void deleteCurrentUser_shouldDeleteUser() {
+        mockAuth(email);
+        var user = new User();
+        user.setEmail(email);
+        when(userRepository.findUserByEmail(email)).thenReturn(Optional.of(user));
 
         userService.deleteCurrentUser();
-
         verify(userRepository).delete(user);
     }
 
     @Test
-    void deleteCurrentUser_userNotAuthenticated_throwsException() {
-        when(securityContext.getAuthentication()).thenReturn(null);
-
-        assertThrows(IllegalStateException.class, () -> userService.deleteCurrentUser());
-    }
-
-    @Test
-    void deleteCurrentUser_userMismatch_throwsException() {
-        User user = new User();
-        user.setUsersname("otherUser");
-
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.isAuthenticated()).thenReturn(true);
-        when(authentication.getName()).thenReturn("testUser");
-        when(userRepository.findUserByUsersname("testUser")).thenReturn(Optional.of(user));
+    void deleteCurrentUser_shouldThrowIfNotSameEmail() {
+        mockAuth(email);
+        var user = new User();
+        user.setEmail("different@example.com");
+        when(userRepository.findUserByEmail(email)).thenReturn(Optional.of(user));
 
         assertThrows(SecurityException.class, () -> userService.deleteCurrentUser());
     }
 
     @Test
-    void getAllUsers_returnsList() {
-        List<User> users = Collections.singletonList(new User());
+    void changeUsername_shouldUpdateSuccessfully() {
+        mockAuth(email);
+        var user = new User();
+        user.setEmail(email);
+        user.setUsersname("old");
+
+        when(userRepository.findUserByEmail(email)).thenReturn(Optional.of(user));
+        when(userRepository.findUserByUsersname("new")).thenReturn(Optional.empty());
+        when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        var updated = userService.changeUsername("new");
+        assertEquals("new", updated.getUsersname());
+    }
+
+    @Test
+    void changeUsername_shouldThrowIfAlreadyTakenByAnother() {
+        mockAuth(email);
+        var currentUser = new User();
+        currentUser.setEmail(email);
+        currentUser.setId(String.valueOf(1L));
+
+        var existingUser = new User();
+        existingUser.setUsersname("taken");
+        existingUser.setId(String.valueOf(2L));
+
+        when(userRepository.findUserByEmail(email)).thenReturn(Optional.of(currentUser));
+        when(userRepository.findUserByUsersname("taken")).thenReturn(Optional.of(existingUser));
+
+        assertThrows(IllegalArgumentException.class, () -> userService.changeUsername("taken"));
+    }
+
+    @Test
+    void getUserRole_shouldReturnRole() {
+        mockAuth(email);
+        var user = new User();
+        user.setEmail(email);
+        user.setRole(Role.EXPERT);
+
+        when(userRepository.findUserByEmail(email)).thenReturn(Optional.of(user));
+        var result = userService.getUserRole();
+        assertEquals(Role.EXPERT, result);
+    }
+
+    @Test
+    void getAllUsers_shouldReturnList() {
+        List<User> users = List.of(new User(), new User());
         when(userRepository.findAll()).thenReturn(users);
-
-        List<User> result = userService.getAllUsers();
-
-        assertEquals(1, result.size());
+        assertEquals(2, userService.getAllUsers().size());
     }
 
     @Test
-    void changeUsername_success() {
-        User user = new User();
-        user.setId("662d4ab8bcce4508b6214d7a");
-        user.setUsersname("oldUsername");
-        user.setEmail("test@example.com");
-
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.isAuthenticated()).thenReturn(true);
-        when(authentication.getName()).thenReturn("test@example.com");
-        when(userRepository.findUserByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(userRepository.findUserByUsersname("newUsername")).thenReturn(Optional.empty());
-        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
-
-        User updatedUser = userService.changeUsername("newUsername");
-
-        assertEquals("newUsername", updatedUser.getUsersname());
-    }
-
-    @Test
-    void changeUsername_usernameAlreadyExists_throwsException() {
-        User currentUser = new User();
-        currentUser.setId("662d4ab8bcce4508b6214d7a");
-        currentUser.setUsersname("oldUsername");
-        currentUser.setEmail("test@example.com");
-
-        User anotherUser = new User();
-        anotherUser.setId("613ghab4rhe4ba18b624yb8");
-        anotherUser.setUsersname("newUsername");
-
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.isAuthenticated()).thenReturn(true);
-        when(authentication.getName()).thenReturn("test@example.com");
-        when(userRepository.findUserByEmail("test@example.com")).thenReturn(Optional.of(currentUser));
-        when(userRepository.findUserByUsersname("newUsername")).thenReturn(Optional.of(anotherUser));
-
-        assertThrows(IllegalArgumentException.class, () -> userService.changeUsername("newUsername"));
+    void getUserByUsername_shouldReturnUser() {
+        var user = new User();
+        user.setUsersname("john");
+        when(userRepository.findUserByUsersname("john")).thenReturn(Optional.of(user));
+        var result = userService.getUserByUsername("john");
+        assertTrue(result.isPresent());
+        assertEquals("john", result.get().getUsersname());
     }
 }

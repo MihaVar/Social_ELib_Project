@@ -12,7 +12,5 @@ public interface CommentRepository extends MongoRepository<Comment, Long> {
     Optional<Comment> findCommentByCommentId(long commentId);
     void deleteAllByItemId(long itemId);
 
-    void deleteByItemId(@NotBlank(message = "Item cannot be empty") long itemId);
-
     void deleteByCommentId(@NotBlank(message = "Comment text cannot be empty") long commentId);
 }
