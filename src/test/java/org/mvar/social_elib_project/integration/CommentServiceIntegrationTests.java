@@ -135,7 +135,6 @@ class ExpertCommentIntegrationTests {
     @Autowired
     private IdCounterService idCounterService;
 
-    private User expertUser;
     private Item testItem;
 
     @BeforeEach
@@ -143,7 +142,7 @@ class ExpertCommentIntegrationTests {
         itemRepository.deleteAll();
         userRepository.deleteAll();
 
-        expertUser = User.builder()
+        User expertUser = User.builder()
                 .email("expert@example.com")
                 .usersname("expertuser")
                 .role(Role.EXPERT)

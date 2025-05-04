@@ -26,13 +26,11 @@ class UserServiceIntegrationTests {
     @Autowired
     private UserRepository userRepository;
 
-    private User testUser;
-
     @BeforeEach
     void setUp() {
         userRepository.deleteAll();
 
-        testUser = new User();
+        User testUser = new User();
         testUser.setEmail("test@example.com");
         testUser.setUsersname("testuser");
         testUser.setRole(Role.USER);

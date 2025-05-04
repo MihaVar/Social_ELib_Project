@@ -36,15 +36,13 @@ class ItemServiceIntegrationTests {
     private static final String TEST_EMAIL = "user@example.com";
     private static final String USERNAME = "testuser";
 
-    private User testUser;
-
     @BeforeEach
     void setup() {
         // Clean DB
         itemRepository.deleteAll();
         userRepository.deleteAll();
 
-        testUser = User.builder()
+        User testUser = User.builder()
                 .email(TEST_EMAIL)
                 .usersname(USERNAME)
                 .password("pass")
