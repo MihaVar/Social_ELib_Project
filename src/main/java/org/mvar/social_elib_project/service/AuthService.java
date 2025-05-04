@@ -4,8 +4,8 @@ import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.mvar.social_elib_project.model.Role;
 import org.mvar.social_elib_project.model.User;
-import org.mvar.social_elib_project.payload.request.AuthRequest;
-import org.mvar.social_elib_project.payload.request.RegisterRequest;
+import org.mvar.social_elib_project.payload.request.auth.AuthRequest;
+import org.mvar.social_elib_project.payload.request.auth.RegisterRequest;
 import org.mvar.social_elib_project.payload.response.AuthResponse;
 import org.mvar.social_elib_project.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,8 +24,15 @@ public class AuthService {
     private final TokenService tokenService;
 
     public AuthResponse register(RegisterRequest registerRequest) {
+        if(userRepository.findUserByUsersname(registerRequest.username()).isPresent()) {
+            throw new IllegalArgumentException("Username is already in use");
+        }
+        if(userRepository.findUserByEmail(registerRequest.email()).isPresent()) {
+            throw new IllegalArgumentException("Email is already in use");
+        }
         User user = User.builder()
-                .username(registerRequest.username())
+                .email(registerRequest.email())
+                .usersname(registerRequest.username())
                 .password(passwordEncoder.encode(registerRequest.password()))
                 .isActive(true)
                 .role(Role.USER)
@@ -41,11 +48,11 @@ public class AuthService {
     }
 
     public AuthResponse authenticate(AuthRequest authRequest) {
-        User user = userRepository.findUserByUsername(authRequest.username())
-                .orElseThrow(() -> new UsernameNotFoundException(authRequest.username()));
+        User user = userRepository.findUserByEmail(authRequest.email())
+                .orElseThrow(() -> new UsernameNotFoundException(authRequest.email()));
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        authRequest.username(),
+                        authRequest.email(),
                         authRequest.password()
                 )
         );
@@ -56,5 +63,9 @@ public class AuthService {
         return AuthResponse.builder()
                 .token(jwtToken)
                 .build();
+    }
+
+    public void logout(String token) {
+        tokenService.invalidateToken(token);
     }
 }
