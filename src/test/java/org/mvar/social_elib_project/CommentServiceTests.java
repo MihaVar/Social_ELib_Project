@@ -12,7 +12,6 @@ import org.mvar.social_elib_project.repository.*;
 import org.mvar.social_elib_project.service.*;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,9 +21,6 @@ class CommentServiceTests {
 
     @Mock
     private CommentRepository commentRepository;
-
-    @Mock
-    private ExpertCommentRepository expertCommentRepository;
 
     @Mock
     private UserRepository userRepository;
@@ -113,9 +109,7 @@ class CommentServiceTests {
         when(commentRepository.findCommentByCommentId(1L)).thenReturn(Optional.of(comment));
         when(userRepository.findUserByEmail("email@test.com")).thenReturn(Optional.of(user));
 
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
-            commentService.deleteComment(1L);
-        });
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> commentService.deleteComment(1L));
 
         assertEquals("User not authorized to delete comment", thrown.getMessage());
     }
@@ -200,9 +194,7 @@ class CommentServiceTests {
         when(commentRepository.findCommentByCommentId(1L)).thenReturn(Optional.of(comment));
         when(userRepository.findUserByEmail("email@test.com")).thenReturn(Optional.of(user));
 
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
-            commentService.updateCommentText(request, 1L);
-        });
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> commentService.updateCommentText(request, 1L));
 
         assertEquals("User not authorized to perform action", thrown.getMessage());
     }
@@ -254,9 +246,7 @@ class CommentServiceTests {
         when(itemRepository.findItemByItemId(1L)).thenReturn(Optional.of(item));  // Mock item to be found
 
         // Assert that an IllegalArgumentException is thrown for non-expert users
-        IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> {
-            commentService.addExpertCommentToItem(request, 1L);
-        });
+        IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> commentService.addExpertCommentToItem(request, 1L));
 
         assertEquals("User does not have permission to add expert comment", thrown.getMessage());
     }
@@ -305,9 +295,7 @@ class CommentServiceTests {
         when(itemRepository.findAll()).thenReturn(Collections.singletonList(item));
         when(userRepository.findUserByEmail("email@test.com")).thenReturn(Optional.of(user));
 
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
-            commentService.deleteExpertComment(1L);
-        });
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> commentService.deleteExpertComment(1L));
 
         assertEquals("User not authorized to delete this comment", thrown.getMessage());
     }

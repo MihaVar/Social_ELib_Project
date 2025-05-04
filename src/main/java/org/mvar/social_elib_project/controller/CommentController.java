@@ -24,7 +24,7 @@ public class CommentController {
     }
     @DeleteMapping("/comments/{commentId}/delete_comment")
     public ResponseEntity<Void> deleteComment(
-            @PathVariable long commentId, @PathVariable String itemId) {
+            @PathVariable long commentId) {
         commentService.deleteComment(commentId);
 
         return ResponseEntity.noContent().build();
@@ -36,20 +36,20 @@ public class CommentController {
     }
     @GetMapping("/comments/{commentId}")
     public boolean checkCommentPermission(
-            @PathVariable long commentId, @PathVariable long itemId) {
+            @PathVariable long commentId) {
         return commentService.checkUserCommentPermission(commentId);
     }
     @CrossOrigin(origins = "http://localhost:3000")
     @PatchMapping("/comments/{commentId}/update_comment")
     public ResponseEntity<Comment> updateComment(
             @PathVariable long commentId,
-            @RequestBody UpdateCommentRequest request,
-            @PathVariable String itemId) {
+            @RequestBody UpdateCommentRequest request) {
         return ResponseEntity.ok(commentService.updateCommentText(request, commentId));
     }
     @PutMapping("/add_expert_comment")
     public ResponseEntity<Item> addExpertComment(
-            @RequestBody AddExpertCommentRequest addExpertCommentRequest, @PathVariable long itemId) {
+            @RequestBody AddExpertCommentRequest addExpertCommentRequest,
+            @PathVariable long itemId) {
         return ResponseEntity.ok(commentService.addExpertCommentToItem(addExpertCommentRequest, itemId));
     }
     @GetMapping("/expert_comments")
@@ -60,18 +60,19 @@ public class CommentController {
     }
     @GetMapping("/expert_comments/{expertCommentId}")
     public boolean checkExpertCommentPermission(
-            @PathVariable long expertCommentId, @PathVariable long itemId) {
+            @PathVariable long expertCommentId) {
         return commentService.checkExpertCommentPermission(expertCommentId);
     }
     @DeleteMapping("/expert_comments/{expertCommentId}/delete_expert_comment")
     public ResponseEntity<Void> deleteExpertComment(
-            @PathVariable long expertCommentId, @PathVariable long itemId) {
+            @PathVariable long expertCommentId) {
         commentService.deleteExpertComment(expertCommentId);
         return ResponseEntity.noContent().build();
     }
     @PatchMapping("/expert_comments/{expertCommentId}/update_expert_comment")
     public ResponseEntity<Void> editExpertComment(
-            @RequestBody UpdateCommentRequest request, @PathVariable long expertCommentId, @PathVariable long itemId) {
+            @RequestBody UpdateCommentRequest request,
+            @PathVariable long expertCommentId) {
         commentService.updateExpertCommentText(request, expertCommentId);
         return ResponseEntity.noContent().build();
     }

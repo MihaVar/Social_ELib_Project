@@ -184,7 +184,7 @@ public class CommentService {
 
 
     @Transactional
-    public Item updateExpertCommentText(UpdateCommentRequest request, Long expertCommentId) {
+    public void updateExpertCommentText(UpdateCommentRequest request, Long expertCommentId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new IllegalStateException("User is not authenticated");
@@ -212,7 +212,7 @@ public class CommentService {
             throw new IllegalArgumentException("User not authorized to perform action");
         }
         commentToUpdate.setText(request.text());
-        return itemRepository.save(item);
+        itemRepository.save(item);
     }
 
 

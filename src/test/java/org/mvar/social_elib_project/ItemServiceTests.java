@@ -18,7 +18,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,7 +29,6 @@ class ItemServiceTests {
     @Mock private UserRepository userRepository;
     @Mock private CommentRepository commentRepository;
     @Mock private IdCounterService idCounterService;
-    @Mock private ImageService imageService;
 
     @InjectMocks private ItemService itemService;
 
@@ -42,15 +40,15 @@ class ItemServiceTests {
         SecurityContextHolder.clearContext();
     }
 
-    private void mockAuth(String email) {
+    private void mockAuth() {
         SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(email, null, List.of())
+                new UsernamePasswordAuthenticationToken("user@example.com", null, List.of())
         );
     }
 
     @Test
     void createNewItem_shouldCreateSuccessfully() throws IOException {
-        mockAuth(email);
+        mockAuth();
         User user = new User();
         user.setEmail(email);
         user.setUsersname("user1");
@@ -69,7 +67,7 @@ class ItemServiceTests {
 
     @Test
     void deleteItem_shouldDeleteIfOwner() {
-        mockAuth(email);
+        mockAuth();
         User user = new User();
         user.setEmail(email);
         user.setUsersname("owner");
@@ -143,7 +141,7 @@ class ItemServiceTests {
 
     @Test
     void checkUserItemPermission_shouldReturnTrueIfOwner() {
-        mockAuth(email);
+        mockAuth();
         User user = new User();
         user.setEmail(email);
         user.setUsersname("user1");
@@ -159,7 +157,7 @@ class ItemServiceTests {
 
     @Test
     void checkIfUserVoted_shouldReturnTrueIfVoted() {
-        mockAuth(email);
+        mockAuth();
         Item item = new Item();
         item.setUsersWhoVoted(Set.of(email));
 
