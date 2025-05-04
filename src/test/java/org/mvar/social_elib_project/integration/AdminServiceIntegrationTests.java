@@ -9,15 +9,12 @@ import org.mvar.social_elib_project.repository.ExpertCommentRepository;
 import org.mvar.social_elib_project.repository.ItemRepository;
 import org.mvar.social_elib_project.repository.UserRepository;
 import org.mvar.social_elib_project.service.AdminService;
-import org.mvar.social_elib_project.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -44,20 +41,16 @@ class AdminServiceIntegrationTests {
     private ItemRepository itemRepository;
 
     private User testUser;
-    private User testAdmin;
-    @Autowired
-    private UserService userService;
 
     @BeforeEach
     public void setUp() {
-        // Створити тестових користувачів
         testUser = User.builder()
                 .email("test@test.com")
                 .password("password")
                 .role(Role.USER)
                 .build();
         testUser.setUsersname("TestUser_" + System.currentTimeMillis());
-        testAdmin = User.builder()
+        User testAdmin = User.builder()
                 .email("testadminemail@gmail.com")
                 .password("adminpassword")
                 .role(Role.ADMIN)
@@ -85,7 +78,6 @@ class AdminServiceIntegrationTests {
 
     @Test
     public void shouldDeleteCommentByAdmin() {
-        // Створити коментар для видалення
         Comment comment = new Comment();
         comment.setText("Test comment");
         testUser.setUsersname("new_int_test_user_comment");
@@ -100,27 +92,22 @@ class AdminServiceIntegrationTests {
 
     @Test
     public void shouldDeleteExpertCommentByAdmin() {
-        // Створити екземпляр предмета (Item)
         Item item = new Item();
         item.setItemId(1);
-        itemRepository.save(item); // ID буде згенеровано автоматично
+        itemRepository.save(item);
 
-        // Створити екземпляр експертного коментаря
         ExpertComment expertComment = new ExpertComment();
         expertComment.setExpertCommentId(System.currentTimeMillis());
         testUser.setUsersname("new_int_test_user_expert_comment");
         expertComment.setUser(testUser.getUsersname());
 
-        // Додаємо коментар до предмета (використовуємо Set)
         Set<ExpertComment> expertComments = new HashSet<>();
         expertComments.add(expertComment);
-        item.setExpertComment(expertComments); // Set замість List
+        item.setExpertComment(expertComments);
         itemRepository.save(item);
 
-        // Викликати метод для видалення коментаря
         adminService.deleteExpertCommentByAdmin(expertComment.getExpertCommentId());
 
-        // Перевірка, чи було видалено коментар
         Optional<ExpertComment> deletedComment = expertCommentRepository.findById(expertComment.getExpertCommentId());
         assertFalse(deletedComment.isPresent(), "Expert comment should be deleted");
     }
@@ -129,7 +116,6 @@ class AdminServiceIntegrationTests {
 
     @Test
     public void shouldDeleteItemByAdmin() {
-        // Створити предмет для видалення
         Item item = new Item();
         item.setItemId(2);
         itemRepository.save(item);
@@ -143,12 +129,9 @@ class AdminServiceIntegrationTests {
 
     @Test
     public void shouldThrowExceptionIfUserIsNotAdmin() {
-        // Перевірка на неадміністратора
         SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken(testUser.getEmail(), null, "ROLE_USER"));
 
-        SecurityException exception = assertThrows(SecurityException.class, () -> {
-            adminService.deleteUserByAdmin(testUser.getUsersname());
-        });
+        SecurityException exception = assertThrows(SecurityException.class, () -> adminService.deleteUserByAdmin(testUser.getUsersname()));
 
         assertEquals("User does not have permission to delete other users", exception.getMessage(), "Exception message should match");
     }

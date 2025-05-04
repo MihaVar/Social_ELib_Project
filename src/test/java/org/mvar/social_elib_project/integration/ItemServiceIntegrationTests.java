@@ -13,7 +13,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.Optional;
@@ -85,7 +84,7 @@ class ItemServiceIntegrationTests {
 
     @Test
     @Order(2)
-    void testVoteItem() throws Exception {
+    void testVoteItem() {
         Item item = createAndSaveItem("Voting Test");
         Item votedItem = itemService.voteItem(item.getItemId(), USERNAME, 1);
 
@@ -95,7 +94,7 @@ class ItemServiceIntegrationTests {
 
     @Test
     @Order(3)
-    void testUnvoteItem() throws Exception {
+    void testUnvoteItem() {
         Item item = createAndSaveItem("Unvote Test");
         itemService.voteItem(item.getItemId(), USERNAME, 1);
 
