@@ -1,4 +1,4 @@
-package org.mvar.social_elib_project;
+package org.mvar.social_elib_project.unit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

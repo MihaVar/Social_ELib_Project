@@ -11,6 +11,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class AdminService {
@@ -51,13 +53,22 @@ public class AdminService {
     }
 
     public void deleteExpertCommentByAdmin(long expertCommentId) {
-        ExpertComment expertComment = expertCommentRepository.findExpertCommentByExpertCommentId(expertCommentId)
-                .orElseThrow(() -> new IllegalArgumentException("Expert comment not found: " + expertCommentId));
-        Item item = itemRepository.findById(expertComment.getItemId())
-                .orElseThrow(() -> new IllegalArgumentException("Item not found: " + expertComment.getItemId()));
         adminAuth();
-        expertCommentRepository.delete(expertComment);
-        item.setExpertComment(null);
+        Optional<Item> itemOptional = itemRepository.findAll().stream()
+                .filter(item -> item.getExpertComment().stream()
+                        .anyMatch(comment -> comment.getExpertCommentId() == expertCommentId))
+                .findFirst();
+        if (itemOptional.isEmpty()) {
+            throw new IllegalArgumentException("ExpertComment not found in any item: " + expertCommentId);
+        }
+        Item item = itemOptional.get();
+
+        ExpertComment commentToDelete = item.getExpertComment().stream()
+                .filter(comment -> comment.getExpertCommentId() == expertCommentId)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("ExpertComment not found: " + expertCommentId));
+        item.getExpertComment().remove(commentToDelete);
+        itemRepository.save(item);
     }
 
     public void deleteItemByAdmin(long itemId) {
