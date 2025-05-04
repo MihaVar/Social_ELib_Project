@@ -34,15 +34,15 @@ class UserServiceTests {
         SecurityContextHolder.clearContext();
     }
 
-    private void mockAuth(String email) {
+    private void mockAuth() {
         SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(email, null, List.of())
+                new UsernamePasswordAuthenticationToken("test@example.com", null, List.of())
         );
     }
 
     @Test
     void getCurrentUser_shouldReturnUser() {
-        mockAuth(email);
+        mockAuth();
         var user = new User();
         user.setEmail(email);
         when(userRepository.findUserByEmail(email)).thenReturn(Optional.of(user));
@@ -53,7 +53,7 @@ class UserServiceTests {
 
     @Test
     void deleteCurrentUser_shouldDeleteUser() {
-        mockAuth(email);
+        mockAuth();
         var user = new User();
         user.setEmail(email);
         when(userRepository.findUserByEmail(email)).thenReturn(Optional.of(user));
@@ -64,7 +64,7 @@ class UserServiceTests {
 
     @Test
     void deleteCurrentUser_shouldThrowIfNotSameEmail() {
-        mockAuth(email);
+        mockAuth();
         var user = new User();
         user.setEmail("different@example.com");
         when(userRepository.findUserByEmail(email)).thenReturn(Optional.of(user));
@@ -74,7 +74,7 @@ class UserServiceTests {
 
     @Test
     void changeUsername_shouldUpdateSuccessfully() {
-        mockAuth(email);
+        mockAuth();
         var user = new User();
         user.setEmail(email);
         user.setUsersname("old");
@@ -89,7 +89,7 @@ class UserServiceTests {
 
     @Test
     void changeUsername_shouldThrowIfAlreadyTakenByAnother() {
-        mockAuth(email);
+        mockAuth();
         var currentUser = new User();
         currentUser.setEmail(email);
         currentUser.setId(String.valueOf(1L));
@@ -106,7 +106,7 @@ class UserServiceTests {
 
     @Test
     void getUserRole_shouldReturnRole() {
-        mockAuth(email);
+        mockAuth();
         var user = new User();
         user.setEmail(email);
         user.setRole(Role.EXPERT);
