@@ -5,12 +5,18 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
+import java.util.Properties;
+
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class })
-@EnableMongoRepositories
 public class SocialELibProjectApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SocialELibProjectApplication.class, args);
+		SpringApplication application = new SpringApplication(SocialELibProjectApplication.class);
+		Properties properties = new Properties();
+		properties.put("spring.data.mongodb.uri", System.getenv("MONGODB_URI"));
+		application.setDefaultProperties(properties);
+
+		application.run(args);
 	}
 
 }
