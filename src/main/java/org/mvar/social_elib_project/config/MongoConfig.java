@@ -18,12 +18,12 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
 
     @Override
     protected String getDatabaseName() {
-        return "social_elib"; // Назва твоєї бази даних у MongoDB Atlas
+        return "social_elib";
     }
 
     @Override
     public MongoClient mongoClient() {
-        return MongoClients.create(mongoUri);  // Підключення до MongoDB Atlas через URI
+        return MongoClients.create(mongoUri);
     }
 
     @Bean
