@@ -13,7 +13,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 @Data
@@ -36,10 +38,8 @@ public class User implements UserDetails {
     private boolean isActive;
     @Enumerated(EnumType.STRING)
     private Role role;
-
-    public User(String testUser) {
-
-    }
+    private Set<Long> favouredItems = new HashSet<>();
+    private Set<String> expertAccomplishments = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

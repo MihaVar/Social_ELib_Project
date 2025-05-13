@@ -29,12 +29,15 @@ public class SecurityConfig {
             "/catalog/{itemId}/comments",
             "/images/{id}",
             "/catalog/items/{username}",
-            "/users/{username}"
+            "/users/{username}",
+            "/users/{username}/favourites",
+            "/users/{username}/expert-accomplishments"
     };
 
     private static final String[] EXPERTLIST_URLS = {
             "/catalog/{itemId}/add_expert_comment",
-            "/catalog/{itemId}/expert_comments/**"
+            "/catalog/{itemId}/expert_comments/**",
+            "/users/{username}/add-expert-accomplishments"
     };
 
     private static final String[] AUTHORIZEDLIST_URLS = {
@@ -64,6 +67,12 @@ public class SecurityConfig {
                                 .permitAll()
                                 .requestMatchers(HttpMethod.OPTIONS, "/**")
                                 .permitAll()
+                                .requestMatchers("/ws/**")
+                                .permitAll()
+                                .requestMatchers("/api/**")
+                                .permitAll()
+                                .requestMatchers(AUTHORIZEDLIST_URLS)
+                                .hasAnyAuthority(USER.name(), EXPERT.name(), ADMIN.name())
                                 .requestMatchers(HttpMethod.GET, AUTHORIZEDLIST_URLS)
                                 .hasAnyAuthority(USER.name(), EXPERT.name(), ADMIN.name())
                                 .requestMatchers(HttpMethod.POST, AUTHORIZEDLIST_URLS)
