@@ -14,6 +14,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -36,6 +38,8 @@ public class AuthService {
                 .password(passwordEncoder.encode(registerRequest.password()))
                 .isActive(true)
                 .role(Role.USER)
+                .favouredItems(new HashSet<>())
+                .expertAccomplishments(new HashSet<>())
                 .build();
         userRepository.save(user);
 

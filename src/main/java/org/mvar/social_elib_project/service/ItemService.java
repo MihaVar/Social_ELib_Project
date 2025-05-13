@@ -16,9 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -86,6 +84,18 @@ public class ItemService {
     }
 
     public List<Item> getItemsByUser(String username) { return itemRepository.findItemsByUser(username); }
+
+    public List<Item> getFavouredItemsByUser(String username) {
+        User user = userRepository.findUserByUsersname(username)
+                .orElseThrow(() -> new IllegalArgumentException("User with username not found: " + username));
+        Set<Long> favouredItemIds = user.getFavouredItems();
+        System.out.println(favouredItemIds);
+        if (favouredItemIds == null || favouredItemIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        System.out.println(itemRepository.findItemsByItemId(favouredItemIds));
+        return itemRepository.findAllByItemIdIn(favouredItemIds);
+    }
 
     public List<Item> getItemsByCategory(String category) {
         return itemRepository.findItemsByCategory(category);
