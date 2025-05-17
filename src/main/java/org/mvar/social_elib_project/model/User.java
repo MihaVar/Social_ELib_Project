@@ -40,6 +40,7 @@ public class User implements UserDetails {
     private Role role;
     private Set<Long> favouredItems = new HashSet<>();
     private Set<String> expertAccomplishments = new HashSet<>();
+    private int userRating;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -25,11 +25,6 @@ public class ChatController {
 
     @GetMapping("/api/chat/last-messages")
     public List<ChatMessage> getLastMessages() {
-        return chatMessageRepository.findTop50ByOrderByTimestampDesc();
-    }
-
-    @GetMapping("api/chat/messages")
-    public List<ChatMessage> getMessages() {
-        return chatService.getChatMessages();
+        return chatService.getLastMessages();
     }
 }

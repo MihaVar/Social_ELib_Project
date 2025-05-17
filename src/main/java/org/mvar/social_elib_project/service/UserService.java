@@ -3,7 +3,7 @@ package org.mvar.social_elib_project.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.mvar.social_elib_project.model.*;
-import org.mvar.social_elib_project.payload.request.user.AddExpertAccomplishmentRequest;
+import org.mvar.social_elib_project.payload.request.user.ExpertAccomplishmentRequest;
 import org.mvar.social_elib_project.repository.UserRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -122,7 +122,7 @@ public class UserService {
         return user.getFavouredItems().contains(itemId);
     }
 
-    public User addExpertAccomplishment(AddExpertAccomplishmentRequest request) {
+    public User addExpertAccomplishment(ExpertAccomplishmentRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new IllegalStateException("User is not authenticated");
@@ -139,6 +139,23 @@ public class UserService {
             user.setExpertAccomplishments(new HashSet<>());
         }
         user.getExpertAccomplishments().add(request.accomplishment());
+        return userRepository.save(user);
+    }
+
+    public User removeExpertAccomplishment(ExpertAccomplishmentRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User is not authenticated");
+        }
+        boolean isExpert = authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals(Role.EXPERT.name()));
+        if (!isExpert) {
+            throw new IllegalStateException("User does not have permission to add expert comment");
+        }
+        String email = authentication.getName();
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
+        user.getExpertAccomplishments().remove(request.accomplishment());
         return userRepository.save(user);
     }
 

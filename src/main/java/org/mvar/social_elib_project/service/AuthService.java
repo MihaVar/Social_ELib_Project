@@ -40,6 +40,7 @@ public class AuthService {
                 .role(Role.USER)
                 .favouredItems(new HashSet<>())
                 .expertAccomplishments(new HashSet<>())
+                .userRating(0)
                 .build();
         userRepository.save(user);
 

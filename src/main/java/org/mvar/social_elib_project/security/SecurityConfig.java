@@ -37,7 +37,8 @@ public class SecurityConfig {
     private static final String[] EXPERTLIST_URLS = {
             "/catalog/{itemId}/add_expert_comment",
             "/catalog/{itemId}/expert_comments/**",
-            "/users/{username}/add-expert-accomplishments"
+            "/users/{username}/add-expert-accomplishments",
+            "/users/{username}/remove-expert-accomplishment"
     };
 
     private static final String[] AUTHORIZEDLIST_URLS = {
@@ -72,13 +73,15 @@ public class SecurityConfig {
                                 .requestMatchers("/api/**")
                                 .permitAll()
                                 .requestMatchers(AUTHORIZEDLIST_URLS)
-                                .hasAnyAuthority(USER.name(), EXPERT.name(), ADMIN.name())
+                                .hasAnyAuthority(USER.name(), EXPERT.name(), ADMIN.name(), RESPECTED_USER.name())
                                 .requestMatchers(HttpMethod.GET, AUTHORIZEDLIST_URLS)
-                                .hasAnyAuthority(USER.name(), EXPERT.name(), ADMIN.name())
+                                .hasAnyAuthority(USER.name(), EXPERT.name(), ADMIN.name(), RESPECTED_USER.name())
                                 .requestMatchers(HttpMethod.POST, AUTHORIZEDLIST_URLS)
-                                .hasAnyAuthority(USER.name(), EXPERT.name(), ADMIN.name())
+                                .hasAnyAuthority(USER.name(), EXPERT.name(), ADMIN.name(), RESPECTED_USER.name())
                                 .requestMatchers(HttpMethod.PATCH, AUTHORIZEDLIST_URLS)
-                                .hasAnyAuthority(USER.name(), EXPERT.name(), ADMIN.name())
+                                .hasAnyAuthority(USER.name(), EXPERT.name(), ADMIN.name(), RESPECTED_USER.name())
+                                .requestMatchers(HttpMethod.PUT, AUTHORIZEDLIST_URLS)
+                                .hasAnyAuthority(USER.name(), EXPERT.name(), ADMIN.name(), RESPECTED_USER.name())
                                 .requestMatchers(HttpMethod.POST, ADMINLIST_URLS)
                                 .hasAnyAuthority(ADMIN.name())
                                 .requestMatchers(HttpMethod.DELETE, ADMINLIST_URLS)

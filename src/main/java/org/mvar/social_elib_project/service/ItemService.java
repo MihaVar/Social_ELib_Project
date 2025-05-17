@@ -3,6 +3,7 @@ package org.mvar.social_elib_project.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.mvar.social_elib_project.model.Item;
+import org.mvar.social_elib_project.model.Role;
 import org.mvar.social_elib_project.model.User;
 import org.mvar.social_elib_project.payload.request.item.AddItemRequest;
 import org.mvar.social_elib_project.payload.request.item.UpdateItemRequest;
@@ -153,14 +154,21 @@ public class ItemService {
     public Item voteItem(Long itemId, String user, int vote) {
         Item item = itemRepository.findItemByItemId(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
+        User author = userRepository.findUserByUsersname(item.getUser())
+                .orElseThrow(() -> new IllegalArgumentException("Item creator not found: " + item.getUser()));
         if (item.getUsersWhoVoted().contains(user)) {
             throw new IllegalStateException("User has already voted for this item");
         }
         if (vote != 1 && vote != -1) {
             throw new IllegalArgumentException("Invalid vote value. Must be 1 or -1");
         }
-        item.setRating(item.getRating() + vote);
         item.getUsersWhoVoted().add(user);
+        author.setUserRating(author.getUserRating() + vote);
+        if(author.getUserRating() > 50) {
+            author.setRole(Role.RESPECTED_USER);
+        }
+        userRepository.save(author);
+        item.setRating(item.getRating() + vote);
         return itemRepository.save(item);
     }
 

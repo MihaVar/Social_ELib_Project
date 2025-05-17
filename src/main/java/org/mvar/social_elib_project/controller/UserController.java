@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.mvar.social_elib_project.model.Item;
 import org.mvar.social_elib_project.model.Role;
 import org.mvar.social_elib_project.model.User;
-import org.mvar.social_elib_project.payload.request.user.AddExpertAccomplishmentRequest;
+import org.mvar.social_elib_project.payload.request.user.ExpertAccomplishmentRequest;
 import org.mvar.social_elib_project.payload.request.user.UserChangeUsernameRequest;
 import org.mvar.social_elib_project.service.ItemService;
 import org.mvar.social_elib_project.service.UserService;
@@ -71,8 +71,12 @@ public class UserController {
         return ResponseEntity.ok(itemService.getFavouredItemsByUser(username));
     }
     @PutMapping("/{username}/add-expert-accomplishments")
-    public ResponseEntity<User> addExpertAccomplishments(@RequestBody AddExpertAccomplishmentRequest request, @PathVariable String username) {
+    public ResponseEntity<User> addExpertAccomplishments(@RequestBody ExpertAccomplishmentRequest request, @PathVariable String username) {
         return ResponseEntity.ok(userService.addExpertAccomplishment(request));
+    }
+    @DeleteMapping("/{username}/remove-expert-accomplishment")
+    public ResponseEntity<User> removeExpertAccomplishments(@RequestBody ExpertAccomplishmentRequest request, @PathVariable String username) {
+        return ResponseEntity.ok(userService.removeExpertAccomplishment(request));
     }
     @GetMapping("/{username}/expert-accomplishments")
     public ResponseEntity<Set<String>> addExpertAccomplishments(@PathVariable String username) {

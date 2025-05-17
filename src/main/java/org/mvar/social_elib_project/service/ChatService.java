@@ -18,7 +18,7 @@ public class ChatService {
         return chatMessageRepository.save(message);
     }
 
-    public List<ChatMessage> getChatMessages() {
-        return chatMessageRepository.findAll();
+    public List<ChatMessage> getLastMessages() {
+        return chatMessageRepository.findTop50ByOrderByTimestampDesc();
     }
 }
