@@ -22,18 +22,9 @@ public class AdminService {
     private final ExpertCommentRepository expertCommentRepository;
 
     public void deleteUserByAdmin(String username) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("User is not authenticated");
-        }
-        boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals(Role.ADMIN.name()));
-        if (!isAdmin) {
-            throw new SecurityException("User does not have permission to delete other users");
-        }
+        adminAuth();
         User userToDelete = userRepository.findUserByUsersname(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
-
         userRepository.delete(userToDelete);
     }
 
@@ -62,7 +53,6 @@ public class AdminService {
             throw new IllegalArgumentException("ExpertComment not found in any item: " + expertCommentId);
         }
         Item item = itemOptional.get();
-
         ExpertComment commentToDelete = item.getExpertComment().stream()
                 .filter(comment -> comment.getExpertCommentId() == expertCommentId)
                 .findFirst()

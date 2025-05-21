@@ -16,9 +16,9 @@ public record AddItemRequest(
         String category,
         @NotBlank(message = "Date cannot be empty")
         String publishDate,
-        @NotBlank(message = "Link to source cannot be empty")
         String materialLink,
-        MultipartFile image
+        MultipartFile image,
+        MultipartFile pdf
 ) {
 
 }

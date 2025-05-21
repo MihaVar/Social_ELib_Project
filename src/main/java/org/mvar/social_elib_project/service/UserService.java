@@ -5,8 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.mvar.social_elib_project.model.*;
 import org.mvar.social_elib_project.payload.request.user.ExpertAccomplishmentRequest;
 import org.mvar.social_elib_project.repository.UserRepository;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -16,18 +14,10 @@ import java.util.*;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final AuthService authService;
 
     public void deleteCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("User is not authenticated");
-        }
-        String email = authentication.getName();
-        User user = userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
-        if (!user.getEmail().equals(email)) {
-            throw new SecurityException("Attempt to delete a different user account");
-        }
+        User user = authService.getAuthenticatedUser();
         userRepository.delete(user);
     }
 
@@ -36,25 +26,15 @@ public class UserService {
     }
 
     public User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("User is not authenticated");
-        }
-        String email = authentication.getName(); // або username, якщо токен містить username
-        return userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
+        User user = authService.getAuthenticatedUser();
+        return userRepository.findUserByEmail(user.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + user.getEmail()));
     }
 
 
     @Transactional
     public User changeUsername(String newUsername) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("User is not authenticated");
-        }
-        String email = authentication.getName();
-        User currentUser = userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
+        User currentUser = authService.getAuthenticatedUser();
         if (userRepository.findUserByUsersname(newUsername).isPresent() &&
                 !userRepository.findUserByUsersname(newUsername).get().getId().equals(currentUser.getId())) {
             throw new IllegalArgumentException("Username already exists: " + newUsername);
@@ -64,13 +44,7 @@ public class UserService {
     }
 
     public Role getUserRole() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("User is not authenticated");
-        }
-        String email = authentication.getName();
-        User user = userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
+        User user = authService.getAuthenticatedUser();
         return user.getRole();
     }
 
@@ -79,13 +53,7 @@ public class UserService {
     }
 
     public User favourItem(Long itemId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("User is not authenticated");
-        }
-        String email = authentication.getName();
-        User user = userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
+        User user = authService.getAuthenticatedUser();
         if (user.getFavouredItems().contains(itemId)) {
             throw new IllegalStateException("User has already favoured this item");
         }
@@ -97,13 +65,7 @@ public class UserService {
     }
 
     public User unfavourItem(Long itemId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("User is not authenticated");
-        }
-        String email = authentication.getName();
-        User user = userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
+        User user = authService.getAuthenticatedUser();
         if (!user.getFavouredItems().contains(itemId)) {
             throw new IllegalStateException("User did not favour this item!");
         }
@@ -112,29 +74,13 @@ public class UserService {
     }
 
     public boolean checkFavoriteStatus(Long itemId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("User is not authenticated");
-        }
-        String email = authentication.getName();
-        User user = userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
+        User user = authService.getAuthenticatedUser();
         return user.getFavouredItems().contains(itemId);
     }
 
     public User addExpertAccomplishment(ExpertAccomplishmentRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("User is not authenticated");
-        }
-        boolean isExpert = authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals(Role.EXPERT.name()));
-        if (!isExpert) {
-            throw new IllegalStateException("User does not have permission to add expert comment");
-        }
-        String email = authentication.getName();
-        User user = userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
+        User user = authService.getAuthenticatedUser();
+        authService.checkExpertRole();
         if(user.getExpertAccomplishments() == null) {
             user.setExpertAccomplishments(new HashSet<>());
         }
@@ -143,18 +89,8 @@ public class UserService {
     }
 
     public User removeExpertAccomplishment(ExpertAccomplishmentRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("User is not authenticated");
-        }
-        boolean isExpert = authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals(Role.EXPERT.name()));
-        if (!isExpert) {
-            throw new IllegalStateException("User does not have permission to add expert comment");
-        }
-        String email = authentication.getName();
-        User user = userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
+        User user = authService.getAuthenticatedUser();
+        authService.checkExpertRole();
         user.getExpertAccomplishments().remove(request.accomplishment());
         return userRepository.save(user);
     }

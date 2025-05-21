@@ -8,6 +8,7 @@ import org.mvar.social_elib_project.repository.UserRepository;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mvar.social_elib_project.service.AuthService;
 import org.mvar.social_elib_project.service.UserService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,6 +26,8 @@ class UserServiceTests {
 
     @InjectMocks
     private UserService userService;
+    @InjectMocks
+    private AuthService authService;
 
     private final String email = "test@example.com";
 

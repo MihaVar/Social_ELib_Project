@@ -23,12 +23,13 @@ public class ItemController {
     @PostMapping(value = "/add_item", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Item> addItem(
             @RequestPart("data") String dataJson,
-            @RequestPart(value = "image", required = false) MultipartFile image
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @RequestPart(value = "pdf", required = false) MultipartFile pdf
 
     ) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         AddItemRequest request = objectMapper.readValue(dataJson, AddItemRequest.class);
-        return ResponseEntity.ok(itemService.createNewItem(request, image));
+        return ResponseEntity.ok(itemService.createNewItem(request, image, pdf));
     }
 
 

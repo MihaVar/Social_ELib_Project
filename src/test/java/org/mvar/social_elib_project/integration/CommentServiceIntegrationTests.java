@@ -13,8 +13,10 @@ import org.mvar.social_elib_project.service.CommentService;
 import org.mvar.social_elib_project.service.IdCounterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
@@ -24,7 +26,8 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@TestPropertySource(locations = "classpath:application-test.properties")
+@TestPropertySource(locations = "file:./.env")
+@ActiveProfiles("test")
 class CommentServiceIntegrationTests {
 
     @Autowired
@@ -120,7 +123,8 @@ class CommentServiceIntegrationTests {
 }
 
 @SpringBootTest
-@TestPropertySource(locations = "classpath:application-test.properties")
+@TestPropertySource(locations = "file:./.env")
+@ActiveProfiles("test")
 class ExpertCommentIntegrationTests {
 
     @Autowired

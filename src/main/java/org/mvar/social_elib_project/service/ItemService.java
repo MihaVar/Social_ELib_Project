@@ -27,48 +27,51 @@ public class ItemService {
     private final CommentRepository commentRepository;
     private final IdCounterService idCounterService;
     private final ImageService imageService;
+    private final FileUploadService fileUploadService;
+    private final AuthService authService;
 
-    public Item createNewItem(AddItemRequest request, MultipartFile image) throws IOException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("User is not authenticated");
+    public Item createNewItem(AddItemRequest request, MultipartFile image, MultipartFile pdf) throws IOException {
+        User user = authService.getAuthenticatedUser();
+        // Обробка PDF або посилання
+        String materialLink;
+        if (pdf != null && !pdf.isEmpty()) {
+            materialLink = fileUploadService.savePdf(pdf); // зберігає файл і повертає посилання
+        } else if (request.materialLink() != null && !request.materialLink().isBlank()) {
+            materialLink = request.materialLink();
+        } else {
+            throw new IllegalArgumentException("Either PDF file or materialLink must be provided");
         }
-        String email = authentication.getName();
-        User user = userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User with email " + email + " not found"));
 
-        if (itemRepository.findItemByMaterialLink(request.materialLink()).isPresent()) {
+        // Перевірка на унікальність
+        if (itemRepository.findItemByMaterialLink(materialLink).isPresent()) {
             throw new IllegalArgumentException("Material with the same PDF link already exists");
         }
+
         String imageUrl = (image != null && !image.isEmpty()) ? imageService.saveImage(image) : null;
+
         Item item = Item.builder()
                 .name(request.name())
                 .author(request.author())
                 .description(request.description())
                 .category(request.category())
                 .publishDate(request.publishDate())
-                .materialLink(request.materialLink())
+                .materialLink(materialLink)
                 .image(imageUrl)
                 .user(user.getUsersname())
                 .usersWhoVoted(new HashSet<>())
                 .expertComment(new HashSet<>())
                 .build();
+
         item.setCreationDate(LocalDateTime.now());
         item.setItemId(idCounterService.generateSequence("items_sequence"));
         return itemRepository.save(item);
     }
 
+
     public void deleteItem(Long id) {
         Item item = itemRepository.findItemByItemId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found: " + id));
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("User is not authenticated");
-        }
-        String email = authentication.getName();
-        User user = userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
+        User user = authService.getAuthenticatedUser();
         if (!item.getUser().equals(user.getUsersname())) {
             throw new IllegalArgumentException("User not authorized to perform action");
         }
@@ -106,7 +109,9 @@ public class ItemService {
     public Item updateItem(UpdateItemRequest updateItemRequest, long itemId, MultipartFile image) throws IOException {
         Item item = itemRepository.findItemByItemId(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found"));
-
+        if(!checkUserItemPermission(itemId)) {
+            throw new IllegalArgumentException("You do not have permission to perform action");
+        }
         if (updateItemRequest != null) {
             if (updateItemRequest.name() != null) {
                 item.setName(updateItemRequest.name());
@@ -140,14 +145,7 @@ public class ItemService {
     public boolean checkUserItemPermission(Long itemId) {
         Item item = itemRepository.findItemByItemId(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("User is not authenticated");
-        }
-        String email = authentication.getName();
-        User user = userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User with email not found: " + email));
+        User user = authService.getAuthenticatedUser();
         return item.getUser().equals(user.getUsersname());
     }
 
@@ -166,6 +164,9 @@ public class ItemService {
         author.setUserRating(author.getUserRating() + vote);
         if(author.getUserRating() > 50) {
             author.setRole(Role.RESPECTED_USER);
+        }
+        if(author.getUserRating() == 50 && vote == -1) {
+            author.setRole(Role.USER);
         }
         userRepository.save(author);
         item.setRating(item.getRating() + vote);
@@ -186,13 +187,8 @@ public class ItemService {
     public boolean checkIfUserVoted(Long itemId) {
         Item item = itemRepository.findItemByItemId(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("User is not authenticated");
-        }
-        String email = authentication.getName();
-        // Перевіряємо, чи містить набір голосуючих користувачів ім'я користувача
-        return item.getUsersWhoVoted().contains(email);
+        User user = authService.getAuthenticatedUser();
+        return item.getUsersWhoVoted().contains(user.getEmail());
     }
 }
 

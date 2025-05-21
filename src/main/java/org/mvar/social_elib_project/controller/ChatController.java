@@ -1,7 +1,6 @@
 package org.mvar.social_elib_project.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.mvar.social_elib_project.repository.ChatMessageRepository;
 import org.mvar.social_elib_project.service.ChatService;
 import org.mvar.social_elib_project.model.ChatMessage;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -15,7 +14,6 @@ import java.util.List;
 public class ChatController {
 
     private final ChatService chatService;
-    private final ChatMessageRepository chatMessageRepository;
 
     @MessageMapping("/chat.send")
     @SendTo("/topic/messages")

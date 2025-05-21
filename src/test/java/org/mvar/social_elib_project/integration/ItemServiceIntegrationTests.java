@@ -10,9 +10,11 @@ import org.mvar.social_elib_project.repository.UserRepository;
 import org.mvar.social_elib_project.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Profile;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.Optional;
@@ -20,7 +22,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@TestPropertySource(locations = "classpath:application-test.properties")
+@TestPropertySource("classpath:application-test.properties")
+@ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ItemServiceIntegrationTests {
 
@@ -67,13 +70,16 @@ class ItemServiceIntegrationTests {
                 "Science",
                 "LocalDate.of(2023, 1, 1),",
                 "https://material-link.com",
+                null,
                 null
         );
 
         MockMultipartFile image = new MockMultipartFile(
                 "image", "test.jpg", "image/jpeg", "fake-image-content".getBytes());
+        MockMultipartFile pdf = new MockMultipartFile(
+                "pdf", "test.pdf", "pdf", "fake-pdf-content".getBytes());
 
-        Item item = itemService.createNewItem(request, image);
+        Item item = itemService.createNewItem(request, image, pdf);
 
         assertNotNull(item);
         assertEquals("Test Book", item.getName());

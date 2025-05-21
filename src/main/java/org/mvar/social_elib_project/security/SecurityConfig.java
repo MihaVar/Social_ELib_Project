@@ -31,7 +31,9 @@ public class SecurityConfig {
             "/catalog/items/{username}",
             "/users/{username}",
             "/users/{username}/favourites",
-            "/users/{username}/expert-accomplishments"
+            "/users/{username}/expert-accomplishments",
+            "/files/pdf/**"
+
     };
 
     private static final String[] EXPERTLIST_URLS = {
@@ -42,13 +44,7 @@ public class SecurityConfig {
     };
 
     private static final String[] AUTHORIZEDLIST_URLS = {
-            "/catalog/{itemId}/comments/add_comment",
-            "/catalog/add_item",
-            "/catalog/delete_item",
-            "/catalog/{itemId}/check_update_permission",
-            "/catalog/{itemId}/update_item",
-            "/catalog/{itemId}/vote",
-            "/catalog/{itemId}/unvote",
+            "/catalog/**",
             "/users/me"
     };
 

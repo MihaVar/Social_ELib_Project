@@ -53,15 +53,16 @@ class ItemServiceTests {
         user.setEmail(email);
         user.setUsersname("user1");
 
-        AddItemRequest request = new AddItemRequest("Title", "Author", "Desc", "Category", "PublishDate", "link", null);
+        AddItemRequest request = new AddItemRequest("Title", "Author", "Desc", "Category", "PublishDate", "link", null, null);
         MockMultipartFile image = new MockMultipartFile("image", new byte[0]);
+        MockMultipartFile pdf = new MockMultipartFile("pdf", new byte[0]);
 
         when(userRepository.findUserByEmail(email)).thenReturn(Optional.of(user));
         when(itemRepository.findItemByMaterialLink("link")).thenReturn(Optional.empty());
         when(idCounterService.generateSequence("items_sequence")).thenReturn(1L);
         when(itemRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        Item item = itemService.createNewItem(request, image);
+        Item item = itemService.createNewItem(request, image, pdf);
         assertEquals("Title", item.getName());
     }
 
