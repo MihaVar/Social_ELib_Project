@@ -10,8 +10,6 @@ import org.mvar.social_elib_project.payload.request.item.UpdateItemRequest;
 import org.mvar.social_elib_project.repository.CommentRepository;
 import org.mvar.social_elib_project.repository.ItemRepository;
 import org.mvar.social_elib_project.repository.UserRepository;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
