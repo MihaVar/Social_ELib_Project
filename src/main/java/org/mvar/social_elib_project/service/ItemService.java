@@ -30,17 +30,15 @@ public class ItemService {
 
     public Item createNewItem(AddItemRequest request, MultipartFile image, MultipartFile pdf) throws IOException {
         User user = authService.getAuthenticatedUser();
-        // Обробка PDF або посилання
         String materialLink;
         if (pdf != null && !pdf.isEmpty()) {
-            materialLink = fileUploadService.savePdf(pdf); // зберігає файл і повертає посилання
+            materialLink = fileUploadService.savePdf(pdf);
         } else if (request.materialLink() != null && !request.materialLink().isBlank()) {
             materialLink = request.materialLink();
         } else {
             throw new IllegalArgumentException("Either PDF file or materialLink must be provided");
         }
 
-        // Перевірка на унікальність
         if (itemRepository.findItemByMaterialLink(materialLink).isPresent()) {
             throw new IllegalArgumentException("Material with the same PDF link already exists");
         }
@@ -88,8 +86,7 @@ public class ItemService {
     public List<Item> getItemsByUser(String username) { return itemRepository.findItemsByUser(username); }
 
     public List<Item> getFavouredItemsByUser(String username) {
-        User user = userRepository.findUserByUsersname(username)
-                .orElseThrow(() -> new IllegalArgumentException("User with username not found: " + username));
+        User user = userRepository.findUserByUsersname(username).orElseThrow();
         Set<Long> favouredItemIds = user.getFavouredItems();
         System.out.println(favouredItemIds);
         if (favouredItemIds == null || favouredItemIds.isEmpty()) {

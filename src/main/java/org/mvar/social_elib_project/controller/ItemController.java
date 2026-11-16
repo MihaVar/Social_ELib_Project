@@ -63,19 +63,14 @@ public class ItemController {
     @PatchMapping("/{itemId}/update_item")
     public ResponseEntity<Item> updateItem(
             @PathVariable long itemId,
-            @RequestPart(required = false) MultipartFile image,  // файл зображення
-            @RequestPart(required = false, name="data") String updateItemRequestJson // параметр для JSON даних
+            @RequestPart(required = false) MultipartFile image,
+            @RequestPart(required = false, name="data") String updateItemRequestJson
     ) throws IOException {
         UpdateItemRequest updateItemRequest = null;
-
-        // Перевірка на null для параметра "data"
         if (updateItemRequestJson != null && !updateItemRequestJson.isEmpty()) {
-            // Перетворюємо JSON на об'єкт UpdateItemRequest
             ObjectMapper objectMapper = new ObjectMapper();
             updateItemRequest = objectMapper.readValue(updateItemRequestJson, UpdateItemRequest.class);
         }
-
-        // Оновлюємо предмет через сервіс
         Item updatedItem = itemService.updateItem(updateItemRequest, itemId, image);
 
         return ResponseEntity.ok(updatedItem);

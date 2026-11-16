@@ -93,6 +93,6 @@ public class AuthService {
         if (!isExpert) {
             throw new IllegalStateException("User does not have permission to add expert comment");
         }
-        return isExpert;
+        return true;
     }
 }
