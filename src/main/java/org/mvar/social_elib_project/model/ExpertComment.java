@@ -33,4 +33,6 @@ public class ExpertComment {
     private long itemId;
     @NotBlank(message = "User is required")
     private String user;
+    @NotBlank(message = "Sentiment is required")
+    private double sentiment;
 }

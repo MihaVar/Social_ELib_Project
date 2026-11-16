@@ -30,4 +30,6 @@ public class Comment {
     private long itemId;
     @NotBlank(message = "User cannot be empty")
     private String user;
+    @NotBlank(message = "Sentiment cannot be empty")
+    private double sentiment;
 }

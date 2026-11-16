@@ -22,15 +22,18 @@ public class CommentService {
     private final ItemRepository itemRepository;
     private final IdCounterService idCounterService;
     private final AuthService authService;
+    private final SentimentAnalysisService sentimentAnalysisService;
 
     public Comment addCommentToItem(AddCommentRequest addCommentRequest, long itemId) {
         Item item = itemRepository.findItemByItemId(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
         User user = authService.getAuthenticatedUser();
+        double sentiment = sentimentAnalysisService.analyzeSentiment(addCommentRequest.text());
         Comment comment = Comment.builder()
                 .text(addCommentRequest.text())
                 .itemId(item.getItemId())
                 .user(user.getUsersname())
+                .sentiment(sentiment)
                 .build();
         comment.setDate(LocalDateTime.now());
         comment.setCommentId(idCounterService.generateSequence("comments_sequence"));
@@ -62,7 +65,9 @@ public class CommentService {
         if (!comment.getUser().equals(user.getUsersname())) {
             throw new IllegalArgumentException("User not authorized to perform action");
         }
+        double sentiment = sentimentAnalysisService.analyzeSentiment(request.text());
         comment.setText(request.text());
+        comment.setSentiment(sentiment);
         return commentRepository.save(comment);
     }
 
@@ -78,11 +83,13 @@ public class CommentService {
         if(!authService.checkExpertRole()) {
             throw new IllegalArgumentException("User not authorized to add expert comment");
         }
+        double sentiment = sentimentAnalysisService.analyzeSentiment(addExpertCommentRequest.text());
         ExpertComment expertComment = ExpertComment.builder()
                 .text(addExpertCommentRequest.text())
                 .itemId(item.getItemId())
                 .user(user.getUsersname())
                 .creationDate(LocalDateTime.now())
+                .sentiment(sentiment)
                 .build();
         item.getExpertComment().add(expertComment);
         expertComment.setExpertCommentId(idCounterService.generateSequence("expert_comments_sequence"));
@@ -154,7 +161,9 @@ public class CommentService {
         if (!commentToUpdate.getUser().equals(user.getUsersname())) {
             throw new IllegalArgumentException("User not authorized to perform action");
         }
+        double sentiment = sentimentAnalysisService.analyzeSentiment(request.text());
         commentToUpdate.setText(request.text());
+        commentToUpdate.setSentiment(sentiment);
         itemRepository.save(item);
     }
 
