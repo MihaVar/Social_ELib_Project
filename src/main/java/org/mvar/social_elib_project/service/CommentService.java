@@ -9,6 +9,7 @@ import org.mvar.social_elib_project.payload.request.comment.UpdateCommentRequest
 import org.mvar.social_elib_project.repository.CommentRepository;
 import org.mvar.social_elib_project.repository.ItemRepository;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.templateresolver.ITemplateResolver;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,6 +24,7 @@ public class CommentService {
     private final IdCounterService idCounterService;
     private final AuthService authService;
     private final SentimentAnalysisService sentimentAnalysisService;
+    private final ITemplateResolver iTemplateResolver;
 
     public Comment addCommentToItem(AddCommentRequest addCommentRequest, long itemId) {
         Item item = itemRepository.findItemByItemId(itemId)
@@ -37,16 +39,31 @@ public class CommentService {
                 .build();
         comment.setDate(LocalDateTime.now());
         comment.setCommentId(idCounterService.generateSequence("comments_sequence"));
+
+        AverageScoreProjection projection = commentRepository.getAverageSentimentScoreByItemId(itemId);
+        Double averageScore = (projection != null) ? projection.getAverageScore() : null;
+        item.setSentimentRating(averageScore != null ? averageScore : sentiment);
+        itemRepository.save(item);
+
         return commentRepository.save(comment);
     }
 
     public void deleteComment(long id) {
         Comment comment = commentRepository.findCommentByCommentId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found: " + id));
+        Item item = itemRepository.findItemByItemId(comment.getItemId())
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found: " + comment.getItemId()));
         User user = authService.getAuthenticatedUser();
         if (!comment.getUser().equals(user.getUsersname())) {
             throw new IllegalArgumentException("User not authorized to delete comment");
         }
+
+        AverageScoreProjection projection = commentRepository.getAverageSentimentScoreByItemId(item.getItemId());
+        Double averageScore = (projection != null) ? projection.getAverageScore() : null;
+        item.setSentimentRating(averageScore != null ? averageScore : comment.getSentiment());
+        itemRepository.save(item);
+
+
         commentRepository.deleteByCommentId(id);
     }
 
@@ -61,6 +78,8 @@ public class CommentService {
     public Comment updateCommentText(UpdateCommentRequest request, Long id) {
         Comment comment = commentRepository.findCommentByCommentId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found: " + id));
+        Item item = itemRepository.findItemByItemId(comment.getItemId())
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found: " + comment.getItemId()));
         User user = authService.getAuthenticatedUser();
         if (!comment.getUser().equals(user.getUsersname())) {
             throw new IllegalArgumentException("User not authorized to perform action");
@@ -68,6 +87,12 @@ public class CommentService {
         double sentiment = sentimentAnalysisService.analyzeSentiment(request.text());
         comment.setText(request.text());
         comment.setSentiment(sentiment);
+
+        AverageScoreProjection projection = commentRepository.getAverageSentimentScoreByItemId(item.getItemId());
+        Double averageScore = (projection != null) ? projection.getAverageScore() : null;
+        item.setSentimentRating(averageScore != null ? averageScore : comment.getSentiment());
+        itemRepository.save(item);
+
         return commentRepository.save(comment);
     }
 

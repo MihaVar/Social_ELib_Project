@@ -46,4 +46,5 @@ public class Item {
     private Set<ExpertComment> expertComment = new HashSet<>();
     private int rating = 0;
     private Set<String> usersWhoVoted = new HashSet<>();
+    private Double sentimentRating = 0.5;
 }
