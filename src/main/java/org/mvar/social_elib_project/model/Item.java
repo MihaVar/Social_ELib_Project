@@ -47,4 +47,5 @@ public class Item {
     private int rating = 0;
     private Set<String> usersWhoVoted = new HashSet<>();
     private Double sentimentRating = 0.5;
+    private Double expertSentimentRating = 0.5;
 }

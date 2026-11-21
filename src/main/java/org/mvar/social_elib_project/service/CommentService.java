@@ -104,7 +104,6 @@ public class CommentService {
         Item item = itemRepository.findItemByItemId(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
         User user = authService.getAuthenticatedUser();
-        authService.checkExpertRole();
         if(!authService.checkExpertRole()) {
             throw new IllegalArgumentException("User not authorized to add expert comment");
         }
@@ -118,6 +117,12 @@ public class CommentService {
                 .build();
         item.getExpertComment().add(expertComment);
         expertComment.setExpertCommentId(idCounterService.generateSequence("expert_comments_sequence"));
+
+        double averageExpertScore = item.getExpertComment().stream()
+                .mapToDouble(ExpertComment::getSentiment)
+                .average()
+                .orElse(sentiment);
+        item.setExpertSentimentRating(averageExpertScore);
         return itemRepository.save(item);
     }
 
@@ -146,6 +151,9 @@ public class CommentService {
         if (!commentToDelete.getUser().equals(user.getUsersname())) {
             throw new IllegalArgumentException("User not authorized to delete this comment");
         }
+        AverageScoreProjection projection = commentRepository.getAverageSentimentScoreByItemId(item.getItemId());
+        Double averageScore = (projection != null) ? projection.getAverageScore() : null;
+        item.setExpertSentimentRating(averageScore != null ? averageScore : item.getExpertSentimentRating());
         item.getExpertComment().remove(commentToDelete);
         itemRepository.save(item);
     }
@@ -189,6 +197,11 @@ public class CommentService {
         double sentiment = sentimentAnalysisService.analyzeSentiment(request.text());
         commentToUpdate.setText(request.text());
         commentToUpdate.setSentiment(sentiment);
+        double averageExpertScore = item.getExpertComment().stream()
+                .mapToDouble(ExpertComment::getSentiment)
+                .average()
+                .orElse(sentiment);
+        item.setExpertSentimentRating(averageExpertScore);
         itemRepository.save(item);
     }
 
