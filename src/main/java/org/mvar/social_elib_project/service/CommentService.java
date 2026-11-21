@@ -24,7 +24,6 @@ public class CommentService {
     private final IdCounterService idCounterService;
     private final AuthService authService;
     private final SentimentAnalysisService sentimentAnalysisService;
-    private final ITemplateResolver iTemplateResolver;
 
     public Comment addCommentToItem(AddCommentRequest addCommentRequest, long itemId) {
         Item item = itemRepository.findItemByItemId(itemId)
