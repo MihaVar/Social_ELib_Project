@@ -9,7 +9,6 @@ import org.mvar.social_elib_project.payload.request.comment.UpdateCommentRequest
 import org.mvar.social_elib_project.repository.CommentRepository;
 import org.mvar.social_elib_project.repository.ItemRepository;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.templateresolver.ITemplateResolver;
 
 import java.time.LocalDateTime;
 import java.util.List;
